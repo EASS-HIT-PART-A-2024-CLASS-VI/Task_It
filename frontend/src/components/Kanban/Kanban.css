@@ -1,0 +1,18 @@
+.kanban-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.kanban-column {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .kanban-column ul {
+        list-style: none;
+        padding: 0;
+    }

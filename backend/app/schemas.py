@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 
 class TaskBase(BaseModel):
     title: str
@@ -23,7 +23,9 @@ class UserBase(BaseModel):
     username: str
     email: str
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
     password: str
 
 class User(UserBase):
@@ -41,8 +43,12 @@ class UserResponse(BaseModel):
     username: str
     email: str
 
-    class Config:
-        from_attributes = True
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class Config:
+    from_attributes = True
 
 class GroupCreate(BaseModel):
     name: str
