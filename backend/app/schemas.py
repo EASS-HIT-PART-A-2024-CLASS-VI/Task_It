@@ -1,10 +1,13 @@
 from pydantic import BaseModel,EmailStr
+from datetime import date
+from typing import Optional
 
 class TaskBase(BaseModel):
     title: str
     description: str
     status: str = "Pending"
     assigned_to: str = None
+    deadline: date = None  # Include deadline
 
 class TaskCreate(TaskBase):
     pass
@@ -14,10 +17,12 @@ class TaskUpdate(BaseModel):
 
 class Task(TaskBase):
     id: int
-    owner_id: int = None
+    board_id: Optional[int]
+
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
 
 class UserBase(BaseModel):
     username: str

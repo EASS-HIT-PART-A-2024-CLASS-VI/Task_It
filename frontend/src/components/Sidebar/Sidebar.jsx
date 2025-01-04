@@ -1,13 +1,22 @@
 ﻿import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { FaPlusCircle, FaSignOutAlt } from "react-icons/fa";
 import "./Sidebar.css";
 
-function Sidebar({ groups = [] }) {
-    const [expandedGroup, setExpandedGroup] = useState(null);
+function Sidebar({ boards = [], onCreateBoard = () => { } }) {
+    const [newBoardName, setNewBoardName] = useState("");
 
-    const toggleGroup = (groupId) => {
-        setExpandedGroup(expandedGroup === groupId ? null : groupId);
+    const handleCreateBoard = () => {
+        console.log("handleCreateBoard triggered with:", newBoardName);
+        if (!newBoardName.trim()) {
+            alert("Board name cannot be empty.");
+            return;
+        }
+        onCreateBoard(newBoardName); // Safe even if `onCreateBoard` is not passed
+        setNewBoardName(""); // Clear the input field
     };
+
+    console.log("Boards in Sidebar:", boards);
 
     return (
         <div className="sidebar">
@@ -17,44 +26,36 @@ function Sidebar({ groups = [] }) {
                     🏠 Dashboard
                 </NavLink>
                 <NavLink to="/tasks" className="menu-item">
-                    ✅ My Tasks
+                    ✅ Tasks
                 </NavLink>
                 <NavLink to="/programs" className="menu-item">
-                    📅 My Programs
+                    📅 Programs
                 </NavLink>
             </div>
-            <hr />
-            <h3>Your Groups</h3>
+            <h3>Your Boards</h3>
             <ul className="group-list">
-                {groups.length > 0 ? (
-                    groups.map((group) => (
-                        <li key={group.id} className="group-item">
-                            <div
-                                className="group-name"
-                                onClick={() => toggleGroup(group.id)}
-                            >
-                                {group.name}
-                            </div>
-                            {expandedGroup === group.id && (
-                                <ul className="sub-menu">
-                                    <NavLink to={`/kanban/${group.id}`} className="sub-menu-item">
-                                        🗂 Kanban
-                                    </NavLink>
-                                    <NavLink to={`/schedule/${group.id}`} className="sub-menu-item">
-                                        📅 Schedule
-                                    </NavLink>
-                                    <NavLink to={`/list/${group.id}`} className="sub-menu-item">
-                                        📋 List View
-                                    </NavLink>
-                                </ul>
-                            )}
-                        </li>
-                    ))
-                ) : (
-                    <p>No groups available</p>
-                )}
+                {boards.map((board) => (
+                    <li key={board.id}>
+                        <NavLink to={`/board/${board.id}`} className="menu-item">
+                            {board.name}
+                        </NavLink>
+                    </li>
+                ))}
             </ul>
-            <button className="new-group-button">➕ New Group</button>
+            <div className="create-board">
+                <input
+                    type="text"
+                    value={newBoardName}
+                    onChange={(e) => setNewBoardName(e.target.value)}
+                    placeholder="Enter new board name"
+                />
+                <button onClick={handleCreateBoard}>
+                    <FaPlusCircle /> New Board
+                </button>
+            </div>
+            <button className="menu-item logout-button">
+                <FaSignOutAlt /> Logout
+            </button>
         </div>
     );
 }

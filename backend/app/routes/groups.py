@@ -24,3 +24,4 @@ def add_user_to_group(group_id: int, user_id: int, db: Session = Depends(get_db)
 
     crud.add_user_to_group(db, user, group)
     return group
+

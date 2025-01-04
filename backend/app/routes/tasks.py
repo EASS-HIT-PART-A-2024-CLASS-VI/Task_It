@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app import crud, schemas
 from app.db import get_db
+from app.models import Task
+from app.schemas import TaskCreate
 
 router = APIRouter()
 
@@ -59,3 +61,42 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Task not found")
     crud.delete_task(db, task)
     return {"detail": f"Task with id {task_id} deleted successfully"}
+
+@router.get("/")
+def get_tasks(board_id: int = None, db: Session = Depends(get_db)):
+    """
+    Fetch tasks with optional filtering by board_id.
+    """
+    query = db.query(Task)
+    if board_id:
+        query = query.filter(Task.board_id == board_id)
+    return query.all()
+
+@router.get("/dashboard")
+def task_dashboard(board_id: int = None, db: Session = Depends(get_db)):
+    """
+    Get task statistics grouped by status for a specific board.
+    """
+    query = db.query(Task)
+    if board_id:
+        query = query.filter(Task.board_id == board_id)
+    
+    tasks = query.all()
+    stats = {
+        "total": len(tasks),
+        "pending": sum(1 for task in tasks if task.status == "Pending"),
+        "in_progress": sum(1 for task in tasks if task.status == "In Progress"),
+        "completed": sum(1 for task in tasks if task.status == "Completed"),
+    }
+    return stats
+
+@router.post("/")
+def create_task(task: TaskCreate, board_id: int, db: Session = Depends(get_db)):
+    """
+    Create a new task associated with a specific board.
+    """
+    new_task = Task(**task.dict(), board_id=board_id)
+    db.add(new_task)
+    db.commit()
+    db.refresh(new_task)
+    return new_task
