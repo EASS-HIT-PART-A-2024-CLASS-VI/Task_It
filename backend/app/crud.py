@@ -89,11 +89,11 @@ def get_group_by_name(db: Session, name: str):
     return db.query(Group).filter(Group.name == name).first()
 
 def create_group(db: Session, group: GroupCreate):
-    db_group = Group(name=group.name)
-    db.add(db_group)
+    new_group = models.Group(name=group.name)
+    db.add(new_group)
     db.commit()
-    db.refresh(db_group)
-    return db_group
+    db.refresh(new_group)
+    return new_group
 
 def get_group_by_id(db: Session, group_id: int):
     return db.query(Group).filter(Group.id == group_id).first()
