@@ -1,22 +1,52 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { FaPlusCircle, FaSignOutAlt } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import "./Sidebar.css";
 
-function Sidebar({ boards = [], onCreateBoard = () => { } }) {
+function Sidebar({ boards = [], onCreateBoard }) {
     const [newBoardName, setNewBoardName] = useState("");
 
-    const handleCreateBoard = () => {
-        console.log("handleCreateBoard triggered with:", newBoardName);
+    useEffect(() => {
+        console.log("Sidebar re-rendered. Boards:", boards); // Debug log
+    }, [boards]);
+
+    const handleCreateBoard = async (e) => {
+        e.preventDefault();
         if (!newBoardName.trim()) {
             alert("Board name cannot be empty.");
             return;
         }
-        onCreateBoard(newBoardName); // Safe even if `onCreateBoard` is not passed
-        setNewBoardName(""); // Clear the input field
-    };
 
-    console.log("Boards in Sidebar:", boards);
+        try {
+            // Make sure this URL matches your FastAPI server address
+            const response = await fetch("http://localhost:8000/api/groups", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    // Add CORS headers if needed
+                    "Accept": "application/json",
+                },
+                credentials: "include", // Include if you're using cookies
+                body: JSON.stringify({ name: newBoardName }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Failed to create board");
+            }
+
+            const newBoard = await response.json();
+            console.log("Successfully created board:", newBoard);
+
+            if (typeof onCreateBoard === "function") {
+                onCreateBoard(newBoard);
+            }
+            setNewBoardName("");
+        } catch (error) {
+            console.error("Error creating board:", error);
+            alert(error.message || "Failed to create board. Please try again.");
+        }
+    };
 
     return (
         <div className="sidebar">
@@ -42,17 +72,15 @@ function Sidebar({ boards = [], onCreateBoard = () => { } }) {
                     </li>
                 ))}
             </ul>
-            <div className="create-board">
+            <form className="create-board" onSubmit={handleCreateBoard}>
                 <input
                     type="text"
                     value={newBoardName}
                     onChange={(e) => setNewBoardName(e.target.value)}
                     placeholder="Enter new board name"
                 />
-                <button onClick={handleCreateBoard}>
-                    <FaPlusCircle /> New Board
-                </button>
-            </div>
+                <button type="submit">Create Board</button>
+            </form>
             <button className="menu-item logout-button">
                 <FaSignOutAlt /> Logout
             </button>

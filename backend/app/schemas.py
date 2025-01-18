@@ -58,7 +58,7 @@ class Config:
 class GroupCreate(BaseModel):
     name: str
 
-class GroupResponse(BaseModel):
+class Group(BaseModel):
     id: int
     name: str
 

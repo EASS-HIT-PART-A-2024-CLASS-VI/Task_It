@@ -5,6 +5,8 @@ from .schemas import TaskCreate, TaskUpdate, UserCreate, GroupCreate
 from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
 
+from app import models
+
 
 
 # Tasks
@@ -78,6 +80,7 @@ def create_user(db: Session, user: UserCreate):
 def verify_user(db: Session, email: str, password: str):
     user = db.query(User).filter(User.email == email, User.hashed_password == password).first()
     return user
+
 def get_all_users(db: Session):
     return db.query(User).all()
 
@@ -85,15 +88,19 @@ def get_user_by_id(db: Session, user_id: int):
     return db.query(User).filter(User.id == user_id).first()
 
 # Groups
-def get_group_by_name(db: Session, name: str):
-    return db.query(Group).filter(Group.name == name).first()
+def get_all_groups(db: Session):
+    return db.query(Group).all()
 
 def create_group(db: Session, group: GroupCreate):
-    new_group = models.Group(name=group.name)
-    db.add(new_group)
-    db.commit()
-    db.refresh(new_group)
-    return new_group
+    try:
+        new_group = models.Group(name=group.name)
+        db.add(new_group)
+        db.commit()
+        db.refresh(new_group)
+        return new_group
+    except Exception as e:
+        db.rollback()
+        raise e
 
 def get_group_by_id(db: Session, group_id: int):
     return db.query(Group).filter(Group.id == group_id).first()

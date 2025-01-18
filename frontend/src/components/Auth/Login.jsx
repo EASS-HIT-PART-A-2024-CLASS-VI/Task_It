@@ -11,32 +11,29 @@ function Login({ onLogin }) {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:8000/users/login", {
+            const response = await fetch("http://localhost:8000/api/users/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                }),
             });
 
             const data = await response.json();
             if (response.ok) {
-                alert("Login successful!");
-                onLogin(true); // Notify App.js of successful login
-                navigate("/dashboard"); // Redirect to dashboard
+                console.log("Login successful:", data);
+                onLogin(true);
+                navigate("/dashboard");
             } else {
-                alert(data.detail || "Login failed.");
+                alert(data.detail || "Login failed");
             }
         } catch (error) {
             console.error("Error during login:", error);
             alert("Something went wrong. Please try again.");
         }
-    };
-
-
-
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev);
     };
 
     return (
@@ -68,7 +65,7 @@ function Login({ onLogin }) {
                             <button
                                 type="button"
                                 className="show-password"
-                                onClick={togglePasswordVisibility}
+                                onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? "🙈" : "👁"}
                             </button>

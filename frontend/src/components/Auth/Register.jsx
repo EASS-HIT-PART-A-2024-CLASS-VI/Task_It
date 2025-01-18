@@ -9,28 +9,34 @@ function Register() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
         try {
-            const response = await fetch("http://localhost:8000/users/signup", {
+            const response = await fetch("http://localhost:8000/api/users/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password
+                }),
             });
 
             const data = await response.json();
+
             if (response.ok) {
+                console.log("Registration successful:", data);
                 alert("Registration successful! Please log in.");
-                navigate("/");
+                navigate("/login");
             } else {
-                alert(data.detail || "Registration failed.");
+                alert(data.detail || "Registration failed");
             }
         } catch (error) {
             console.error("Error during registration:", error);
             alert("Something went wrong. Please try again.");
         }
     };
-
 
     return (
         <div className="register-container">

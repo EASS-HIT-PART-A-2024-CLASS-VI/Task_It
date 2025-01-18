@@ -12,30 +12,46 @@ function App() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log("Current boards state:", boards);
         const fetchData = async () => {
-            // Simulating user authentication loading
-            setLoading(false);
+            if (!isAuthenticated) return; // Only fetch if authenticated
+            setLoading(true); // Ensure loading state is updated
+
+            try {
+                console.log("Fetching boards from backend...");
+                const response = await fetch("http://localhost:8000/api/groups", {
+                    credentials: 'include' // Add this to include auth cookies
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to fetch groups");
+                }
+                const data = await response.json();
+                console.log("Fetched boards:", data);
+                setBoards(data); // Set boards after fetching
+            } catch (error) {
+                console.error("Error fetching groups:", error);
+            } finally {
+                setLoading(false); // Loading should stop after fetch attempt
+            }
         };
         fetchData();
-    }, []);
+    }, [isAuthenticated]);
 
     const handleLogin = (isAuth) => {
+        console.log("Setting auth state to:", isAuth);
         setIsAuthenticated(isAuth);
     };
 
-    const handleCreateBoard = (newBoardName) => {
-        console.log("handleCreateBoard invoked with:", newBoardName);
-        if (!newBoardName.trim()) {
-            alert("Board name cannot be empty.");
-            return;
-        }
-        const newBoard = {
-            id: Date.now(),
-            name: newBoardName,
-        };
-        setBoards((prevBoards) => [...prevBoards, newBoard]);
+    const handleCreateBoard = async (newBoard) => {
+        setBoards(prevBoards => {
+            console.log("Previous boards:", prevBoards);
+            const updatedBoards = [...prevBoards, newBoard];
+            console.log("Updated boards:", updatedBoards);
+            return updatedBoards;
+        });
     };
+
+    console.log("Current state:", { isAuthenticated, loading, boards });
+
 
     return (
         <Router>
