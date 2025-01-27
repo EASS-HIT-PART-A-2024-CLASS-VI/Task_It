@@ -65,7 +65,7 @@ function App() {
                     {!loading && isAuthenticated ? (
                         <>
                             <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/board/:boardId" element={<Board boards={boards} />} />
+                            <Route path="/board/:boardId/*" element={<Board boards={boards} />} />
                         </>
                     ) : (
                         <Route path="*" element={<Login onLogin={handleLogin} />} />

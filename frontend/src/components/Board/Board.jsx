@@ -1,6 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Box, Tabs, Tab, Typography } from "@mui/material";
+import { useParams, Routes, Route, Link, useNavigate } from "react-router-dom";
+import {
+    Box,
+    Typography,
+    Drawer,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Button,
+} from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
+import GridViewIcon from "@mui/icons-material/GridView";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import BoardDashboard from "./BoardDashboard/BoardDashboard";
 import Kanban from "./Kanban/Kanban";
 import Grid from "./Grid/Grid";
@@ -9,83 +23,84 @@ import Schedule from "./Schedule/Schedule";
 const Board = () => {
     const { boardId } = useParams();
     const [tasks, setTasks] = useState([]);
-    const [boardInfo, setBoardInfo] = useState(null);
-    const [currentView, setCurrentView] = useState("dashboard");
-    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // Hook for navigation
 
     useEffect(() => {
-        const fetchBoardData = async () => {
-            try {
-                setLoading(true);
-
-                // Fetch tasks
-                const tasksResponse = await fetch(`http://localhost:8000/api/boards/${boardId}/tasks`);
-                if (!tasksResponse.ok) {
-                    throw new Error("Failed to fetch tasks");
-                }
-                const tasksData = await tasksResponse.json();
-                setTasks(tasksData);
-
-                // Fetch board info
-                const boardInfoResponse = await fetch(`http://localhost:8000/api/boards/${boardId}/board-info`);
-                if (!boardInfoResponse.ok) {
-                    throw new Error("Failed to fetch board info");
-                }
-                const boardInfoData = await boardInfoResponse.json();
-                setBoardInfo(boardInfoData);
-            } catch (error) {
-                console.error("Error fetching board data:", error);
-            } finally {
-                setLoading(false);
-            }
+        // Fetch tasks from the API
+        const fetchTasks = async () => {
+            const response = await fetch(`http://localhost:8000/api/boards/${boardId}/tasks`);
+            const data = await response.json();
+            setTasks(data);
         };
 
-        fetchBoardData();
+        fetchTasks();
     }, [boardId]);
 
-    const handleViewChange = (event, newValue) => {
-        setCurrentView(newValue);
-    };
-
-    const addTask = (newTask) => {
-        setTasks((prevTasks) => [...prevTasks, newTask]);
-    };
-
-    const updateTask = (updatedTask) => {
-        setTasks((prevTasks) =>
-            prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-        );
-    };
-
-    if (loading) {
-        return <div>Loading board...</div>;
-    }
-
-    if (!boardInfo) {
-        return <Typography variant="h6" color="error">
-            Board not found.
-        </Typography>;
-    }
-
     return (
-        <Box>
-            <Typography variant="h4" gutterBottom>
-                {boardInfo.name}
-            </Typography>
-            <Typography variant="subtitle1" gutterBottom>
-                Board ID: {boardInfo.id}
-            </Typography>
-            <Tabs value={currentView} onChange={handleViewChange} centered>
-                <Tab label="Dashboard" value="dashboard" />
-                <Tab label="Kanban" value="kanban" />
-                <Tab label="Grid" value="grid" />
-                <Tab label="Schedule" value="schedule" />
-            </Tabs>
-            <Box sx={{ mt: 2 }}>
-                {currentView === "dashboard" && <BoardDashboard tasks={tasks} />}
-                {currentView === "kanban" && <Kanban tasks={tasks} addTask={addTask} updateTask={updateTask} />}
-                {currentView === "grid" && <Grid tasks={tasks} addTask={addTask} updateTask={updateTask} />}
-                {currentView === "schedule" && <Schedule tasks={tasks} />}
+        <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+            {/* Back to Main Dashboard Button */}
+            <Box sx={{ padding: 2, textAlign: "left" }}>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => navigate("/dashboard")} // Navigate back to the main dashboard
+                >
+                    Back to Main Dashboard
+                </Button>
+            </Box>
+
+            {/* Sidebar and Content */}
+            <Box sx={{ display: "flex", flexGrow: 1 }}>
+                {/* Sidebar */}
+                <Drawer
+                    variant="permanent"
+                    sx={{
+                        width: 240,
+                        flexShrink: 0,
+                        [`& .MuiDrawer-paper`]: { width: 240, boxSizing: "border-box" },
+                    }}
+                >
+                    <Typography variant="h6" sx={{ textAlign: "center", marginY: 2 }}>
+                        Board {boardId}
+                    </Typography>
+                    <List>
+                        <ListItem button component={Link} to={`/board/${boardId}/dashboard`}>
+                            <ListItemIcon>
+                                <DashboardIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Dashboard" />
+                        </ListItem>
+                        <ListItem button component={Link} to={`/board/${boardId}/kanban`}>
+                            <ListItemIcon>
+                                <ViewKanbanIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Kanban" />
+                        </ListItem>
+                        <ListItem button component={Link} to={`/board/${boardId}/grid`}>
+                            <ListItemIcon>
+                                <GridViewIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Grid" />
+                        </ListItem>
+                        <ListItem button component={Link} to={`/board/${boardId}/schedule`}>
+                            <ListItemIcon>
+                                <CalendarMonthIcon />
+                            </ListItemIcon>
+                            <ListItemText primary="Schedule" />
+                        </ListItem>
+                    </List>
+                </Drawer>
+
+                {/* Main Content */}
+                <Box sx={{ flexGrow: 1, padding: 3 }}>
+                    <Routes>
+                        <Route path="dashboard" element={<BoardDashboard tasks={tasks} />} />
+                        <Route path="kanban" element={<Kanban tasks={tasks} />} />
+                        <Route path="grid" element={<Grid tasks={tasks} />} />
+                        <Route path="schedule" element={<Schedule tasks={tasks} />} />
+                    </Routes>
+                </Box>
             </Box>
         </Box>
     );

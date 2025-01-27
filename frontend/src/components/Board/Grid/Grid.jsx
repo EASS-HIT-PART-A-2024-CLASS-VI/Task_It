@@ -1,33 +1,32 @@
-// Grid.jsx
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
-function Grid({ tasks, addTask, updateTask }) {
-    const handleAddTask = () => {
-        const newTask = { id: Date.now(), title: "New Task", status: "To Do" };
-        addTask(newTask);
-    };
-
+const Grid = () => {
     const columns = [
-        { field: "id", headerName: "ID", width: 150 },
-        { field: "title", headerName: "Title", width: 300 },
-        { field: "status", headerName: "Status", width: 200 },
+        { field: "id", headerName: "ID", width: 90 },
+        { field: "taskName", headerName: "Task Name", width: 150 },
+        { field: "status", headerName: "Status", width: 150 },
+    ];
+
+    const rows = [
+        { id: 1, taskName: "Task 1", status: "Completed" },
+        { id: 2, taskName: "Task 2", status: "Pending" },
     ];
 
     return (
-        <Box sx={{ height: 400, width: "100%" }}>
-            <DataGrid
-                rows={tasks.map((task) => ({ id: task.id, title: task.title, status: task.status }))}
-                columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-            />
-            <Button variant="contained" sx={{ mt: 2 }} onClick={handleAddTask}>
-                Add Task
-            </Button>
+        <Box>
+            <Typography variant="h4" gutterBottom>
+                Grid
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+                This view shows tasks in a grid format.
+            </Typography>
+            <div style={{ height: 400, width: "100%" }}>
+                <DataGrid rows={rows} columns={columns} pageSize={5} />
+            </div>
         </Box>
     );
-}
+};
 
 export default Grid;
