@@ -10,8 +10,11 @@ from app import models
 
 
 # Tasks
-def get_tasks(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Task).offset(skip).limit(limit).all()
+def get_tasks_for_board(db: Session, board_id: int, task_id: int):
+    tasks = db.query(Task).filter(Task.board_id == board_id).all()
+    if not tasks:
+        raise HTTPException(status_code=404, detail="Task not found for the specified board")
+    return tasks
 
 def create_task(db: Session, task: TaskCreate, owner_id: int):
     db_task = Task(**task.dict(), owner_id=owner_id)
@@ -93,7 +96,7 @@ def get_all_groups(db: Session):
 
 def create_group(db: Session, group: GroupCreate):
     try:
-        new_group = models.Group(name=group.name)
+        new_group = models.Group(name=group.name, created_by=group.created_by)  # Pass created_by
         db.add(new_group)
         db.commit()
         db.refresh(new_group)
@@ -102,8 +105,8 @@ def create_group(db: Session, group: GroupCreate):
         db.rollback()
         raise e
 
-def get_group_by_id(db: Session, group_id: int):
-    return db.query(Group).filter(Group.id == group_id).first()
+def get_group_by_id(db: Session, board_id: int):
+    return db.query(Group).filter(Group.id == board_id).first()
 
 def add_user_to_group(db: Session, user_id: int, group_id: int):
     user = db.query(User).filter(User.id == user_id).first()
@@ -114,3 +117,9 @@ def add_user_to_group(db: Session, user_id: int, group_id: int):
     db.commit()
     db.refresh(user)
     return user
+
+def get_user_groups(db: Session, user_id: int):
+    return db.query(Group).filter(
+        (Group.created_by == user_id) |  # Groups the user created
+        (Group.members.any(id=user_id))  # Groups the user is a member of
+    ).all()

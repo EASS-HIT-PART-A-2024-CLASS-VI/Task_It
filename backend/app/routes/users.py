@@ -27,7 +27,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = verify_user(db, request.email, request.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return {"message": "Login successful", "username": user.username}
+    return {"id": user.id, "username": user.username, "email": user.email}
 
 
 # Register Endpoint

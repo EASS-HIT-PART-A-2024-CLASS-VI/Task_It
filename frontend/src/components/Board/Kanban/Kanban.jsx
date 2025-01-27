@@ -1,25 +1,33 @@
-import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React from "react";
+import { Card, CardContent, Typography, Box, Button } from "@mui/material";
 
-function Kanban() {
-    const { boardname } = useParams();
-
-    useEffect(() => {
-        // Fetch board data by board name
-        fetch(`/api/boards/${boardname}`)
-            .then((response) => response.json())
-            .then((data) => {
-                console.log(data);
-                // Handle board data here
-            })
-            .catch((error) => console.error("Error fetching board data:", error));
-    }, [boardname]);
+function Kanban({ tasks, addTask, updateTask }) {
+    const handleAddTask = () => {
+        const newTask = { id: Date.now(), title: "New Task", status: "Pending" };
+        addTask(newTask);
+    };
 
     return (
-        <div>
-            <h1>{boardname} - Kanban</h1>
-            {/* Kanban view implementation */}
-        </div>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, p: 2 }}>
+            {tasks.map((task) => (
+                <Card key={task.id} sx={{ minWidth: 275 }}>
+                    <CardContent>
+                        <Typography variant="h5" component="div">
+                            {task.title}
+                        </Typography>
+                        <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                            {task.status}
+                        </Typography>
+                        <Button size="small" onClick={() => updateTask({ ...task, status: "In Progress" })}>
+                            Move to In Progress
+                        </Button>
+                    </CardContent>
+                </Card>
+            ))}
+            <Button variant="contained" onClick={handleAddTask}>
+                Add Task
+            </Button>
+        </Box>
     );
 }
 

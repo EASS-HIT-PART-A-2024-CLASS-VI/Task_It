@@ -15,7 +15,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(users.router, prefix="/api/users", tags=["users"])
-app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
+app.include_router(tasks.router, prefix="/api/groups/{board_id}/tasks", tags=["tasks"])
 app.include_router(groups.router, prefix="/api/groups", tags=["groups"])
 
 @app.get("/")

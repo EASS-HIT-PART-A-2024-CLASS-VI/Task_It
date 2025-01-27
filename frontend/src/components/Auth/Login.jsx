@@ -25,6 +25,7 @@ function Login({ onLogin }) {
             const data = await response.json();
             if (response.ok) {
                 console.log("Login successful:", data);
+                localStorage.setItem("userId", data.id);
                 onLogin(true);
                 navigate("/dashboard");
             } else {

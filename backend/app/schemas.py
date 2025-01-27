@@ -10,7 +10,7 @@ class TaskBase(BaseModel):
     deadline: date = None  # Include deadline
 
 class TaskCreate(TaskBase):
-    pass
+    board_id: int
 
 class TaskUpdate(BaseModel):
     status: str
@@ -57,10 +57,12 @@ class Config:
 
 class GroupCreate(BaseModel):
     name: str
+    created_by: int
 
 class Group(BaseModel):
     id: int
     name: str
+    created_by: int 
 
     class Config:
         from_attributes = True

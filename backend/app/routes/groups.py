@@ -19,6 +19,10 @@ def create_group(group: schemas.GroupCreate, db: Session = Depends(get_db)):
 def get_groups(db: Session = Depends(get_db)):
     return crud.get_all_groups(db)
 
+@router.get("/my-groups", response_model=list[schemas.Group])
+def get_my_groups(user_id: int, db: Session = Depends(get_db)):
+    return crud.get_user_groups(db, user_id)
+
 @router.patch("/{group_id}/add_user", response_model=schemas.Group)
 def add_user_to_group(group_id: int, user_id: int, db: Session = Depends(get_db)):
     group = crud.get_group_by_id(db, group_id)
