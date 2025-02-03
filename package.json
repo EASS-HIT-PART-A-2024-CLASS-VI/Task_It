@@ -1,6 +1,12 @@
 {
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@hello-pangea/dnd": "^17.0.0",
+    "@mui/material": "^6.4.2",
     "@mui/x-data-grid": "^7.24.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.474.0",
     "recharts": "^2.15.0"
   }
 }

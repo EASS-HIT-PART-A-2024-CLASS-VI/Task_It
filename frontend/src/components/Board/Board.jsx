@@ -25,16 +25,7 @@ const Board = () => {
     const [tasks, setTasks] = useState([]);
     const navigate = useNavigate(); // Hook for navigation
 
-    useEffect(() => {
-        // Fetch tasks from the API
-        const fetchTasks = async () => {
-            const response = await fetch(`http://localhost:8000/api/boards/${boardId}/tasks`);
-            const data = await response.json();
-            setTasks(data);
-        };
-
-        fetchTasks();
-    }, [boardId]);
+    
 
     return (
         <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
