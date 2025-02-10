@@ -6,11 +6,13 @@ class TaskBase(BaseModel):
     title: str
     description: str
     status: str = "Pending"
-    assigned_to: str = None
-    deadline: date = None  # Include deadline
+    assigned_to: Optional[str] = None  # ✅ Allows `None` explicitly
+    deadline: Optional[date] = None  # ✅ Allows `None`
+
 
 class TaskCreate(TaskBase):
-    pass
+    board_id: int  # ✅ Ensure board_id is included
+
 
 class TaskUpdate(BaseModel):
     status: str

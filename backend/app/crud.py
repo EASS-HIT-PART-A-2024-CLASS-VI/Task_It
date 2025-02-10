@@ -14,6 +14,7 @@ def get_tasks(db: Session, skip: int = 0, limit: int = 10):
     return db.query(Task).offset(skip).limit(limit).all()
 
 def create_task(db: Session, task: TaskCreate, owner_id: int):
+    print(f"Creating task: {task.dict()}")  # ✅ Debugging line
     db_task = Task(**task.dict(), owner_id=owner_id)
     db.add(db_task)
     db.commit()

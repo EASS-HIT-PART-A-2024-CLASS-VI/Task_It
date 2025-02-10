@@ -1,41 +1,76 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app import crud, schemas
 from app.db import get_db
 from app.models import Task
-from app.schemas import TaskCreate
+from app.schemas import TaskCreate, TaskUpdate, TaskAssign
 
 router = APIRouter()
 
-@router.get("/tasks", response_model=list[schemas.Task])
-def read_tasks(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    return crud.get_tasks(db, skip=skip, limit=limit)
+# 📌 שליפת כל המשימות (אופציונלי: סינון לפי board_id)
+@router.get("/", response_model=list[schemas.Task])
+def get_tasks(board_id: int = Query(None), db: Session = Depends(get_db)):
+    """
+    שליפת כל המשימות עם אפשרות לסינון לפי `board_id`
+    """
+    query = db.query(Task)
+    if board_id:
+        query = query.filter(Task.board_id == board_id)
 
-@router.post("/tasks", response_model=schemas.Task)
+    tasks = query.all()
+    if not tasks:
+        raise HTTPException(status_code=404, detail=f"No tasks found{f' for board ID {board_id}' if board_id else ''}")
+    return tasks
+
+# 📌 יצירת משימה חדשה תחת לוח מסוים
+@router.post("/", response_model=schemas.Task)
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
-    # Assuming owner_id is passed (e.g., via authentication)
-    owner_id = 1
-    return crud.create_task(db, task=task, owner_id=owner_id)
+    """
+    יצירת משימה חדשה תחת לוח מסוים (ה-`board_id` חייב להיות בגוף הבקשה)
+    """
+    print(f"Received Task Data: {task.dict()}")  # ✅ Debugging log
 
-@router.patch("/tasks/{task_id}", response_model=schemas.Task)
-def update_task_status(task_id: int, status: schemas.TaskUpdate, db: Session = Depends(get_db)):
-    ALLOWED_STATUSES = ["Pending", "In Progress", "Completed"]
+    # Ensure `board_id` is present
+    if not hasattr(task, "board_id") or task.board_id is None:
+        raise HTTPException(status_code=400, detail="Board ID is required")
+
+    # Validate board exists
+    board = crud.get_group_by_id(db, task.board_id)
+    if not board:
+        raise HTTPException(status_code=404, detail=f"Board with ID {task.board_id} not found")
+
+    # Create task
+    new_task = Task(**task.dict())
+    db.add(new_task)
+    db.commit()
+    db.refresh(new_task)
+    return new_task
+
+
+# 📌 עדכון סטטוס של משימה
+@router.patch("/{task_id}", response_model=schemas.Task)
+def update_task_status(task_id: int, status: TaskUpdate, db: Session = Depends(get_db)):
+    """
+    עדכון סטטוס של משימה לפי `task_id`
+    """
+    ALLOWED_STATUSES = ["Not Started", "Working on It", "Done"]
 
     if status.status not in ALLOWED_STATUSES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid status. Allowed values: {ALLOWED_STATUSES}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid status. Allowed values: {ALLOWED_STATUSES}")
 
-    db_task = crud.update_task_status(db, task_id=task_id, status=status.status)
-    if not db_task:
+    task = crud.update_task_status(db, task_id=task_id, status=status.status)
+    if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    return db_task
+    return task
 
-@router.patch("/tasks/{task_id}/assign", response_model=schemas.Task)
-def assign_task(task_id: int, assignment: schemas.TaskAssign, db: Session = Depends(get_db)):
+# 📌 שיוך משימה למשתמש
+@router.patch("/{task_id}/assign", response_model=schemas.Task)
+def assign_task(task_id: int, assignment: TaskAssign, db: Session = Depends(get_db)):
+    """
+    שיוך משימה למשתמש לפי `task_id`
+    """
     user = crud.get_user_by_username(db, assignment.assigned_to)
     if not user:
         raise HTTPException(status_code=400, detail="User does not exist")
@@ -45,58 +80,33 @@ def assign_task(task_id: int, assignment: schemas.TaskAssign, db: Session = Depe
         raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-@router.get("/tasks/dashboard", response_model=dict)
-def get_tasks_dashboard(db: Session = Depends(get_db)):
-    tasks_by_status = db.query(Task.status, func.count(Task.id)).group_by(Task.status).all()
-    return {"tasks_by_status": dict(tasks_by_status)}
+# 📌 שליפת סטטיסטיקות של משימות
+@router.get("/dashboard", response_model=dict)
+def get_tasks_dashboard(board_id: int = Query(None), db: Session = Depends(get_db)):
+    """
+    שליפת סטטיסטיקות של משימות לכלל המערכת או לפי `board_id`
+    """
+    query = db.query(Task)
+    if board_id:
+        query = query.filter(Task.board_id == board_id)
 
-@router.get("/tasks/filter", response_model=list[schemas.Task])
-def filter_tasks_by_deadline(deadline: date, db: Session = Depends(get_db)):
-    return db.query(Task).filter(Task.deadline <= deadline).all()
+    tasks = query.all()
+    stats = {
+        "total": len(tasks),
+        "not_started": sum(1 for task in tasks if task.status == "Not Started"),
+        "working_on_it": sum(1 for task in tasks if task.status == "Working on It"),
+        "done": sum(1 for task in tasks if task.status == "Done"),
+    }
+    return stats
 
-@router.delete("/tasks/{task_id}", response_model=dict)
+# 📌 מחיקת משימה לפי `task_id`
+@router.delete("/{task_id}", response_model=dict)
 def delete_task(task_id: int, db: Session = Depends(get_db)):
+    """
+    מחיקת משימה לפי `task_id`
+    """
     task = crud.get_task_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     crud.delete_task(db, task)
     return {"detail": f"Task with id {task_id} deleted successfully"}
-
-@router.get("/")
-def get_tasks(board_id: int = None, db: Session = Depends(get_db)):
-    """
-    Fetch tasks with optional filtering by board_id.
-    """
-    query = db.query(Task)
-    if board_id:
-        query = query.filter(Task.board_id == board_id)
-    return query.all()
-
-@router.get("/dashboard")
-def task_dashboard(board_id: int = None, db: Session = Depends(get_db)):
-    """
-    Get task statistics grouped by status for a specific board.
-    """
-    query = db.query(Task)
-    if board_id:
-        query = query.filter(Task.board_id == board_id)
-    
-    tasks = query.all()
-    stats = {
-        "total": len(tasks),
-        "pending": sum(1 for task in tasks if task.status == "Pending"),
-        "in_progress": sum(1 for task in tasks if task.status == "In Progress"),
-        "completed": sum(1 for task in tasks if task.status == "Completed"),
-    }
-    return stats
-
-@router.post("/")
-def create_task(task: TaskCreate, board_id: int, db: Session = Depends(get_db)):
-    """
-    Create a new task associated with a specific board.
-    """
-    new_task = Task(**task.dict(), board_id=board_id)
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-    return new_task
