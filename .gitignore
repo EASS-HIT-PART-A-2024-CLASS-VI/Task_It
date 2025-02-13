@@ -65,9 +65,13 @@ npm-debug.log*
 yarn-debug.log*
 lerna-debug.log*
 
-# Git files
-.git/
-.gitignore
+# Dependency directories
+jspm_packages/
+bower_components/
+node_modules/
+pypi/
+venv/
+
 
 # Docker
 docker-compose.override.yml
