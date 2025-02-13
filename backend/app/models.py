@@ -29,13 +29,13 @@ class Task(Base):
     title = Column(String, index=True)
     description = Column(String)
     status = Column(String, default="Pending")
-    deadline = Column(Date)
-    assigned_to = Column(String)
+    priority = Column(String, default="Medium")
+    deadline = Column(Date, nullable=True)
+    assigned_to = Column(String, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="tasks")
-
-    # Add board association
-    board_id = Column(Integer, ForeignKey("groups.id"))
+    board_id = Column(Integer, ForeignKey("groups.id"), nullable=False)  # ✅ Task belongs to a Group
     board = relationship("Group", back_populates="tasks")
+
 
 

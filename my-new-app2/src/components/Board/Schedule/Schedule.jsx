@@ -1,6 +1,6 @@
 import React from "react";
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
+import dayGridPlugin from "@fullcalendar/daygrid/index.js";
 
 function Schedule() {
     return (

@@ -6,8 +6,10 @@ class TaskBase(BaseModel):
     title: str
     description: str
     status: str = "Pending"
-    assigned_to: Optional[str] = None  # ✅ Allows `None` explicitly
-    deadline: Optional[date] = None  # ✅ Allows `None`
+    priority: str = "Medium"
+    assigned_to: Optional[str] = None
+    deadline: Optional[date] = None
+    board_id: int  # ✅ This is actually `group_id`
 
 
 class TaskCreate(TaskBase):
@@ -15,7 +17,13 @@ class TaskCreate(TaskBase):
 
 
 class TaskUpdate(BaseModel):
-    status: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = None
+    deadline: Optional[date] = None
+    assigned_to: Optional[str] = None
+    board_id: Optional[int] = None
 
 class Task(TaskBase):
     id: int

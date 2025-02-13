@@ -128,6 +128,23 @@ const Kanban = () => {
         }
     };
 
+    const handlePriorityChange = (newPriority) => {
+        setSelectedTask((prev) => ({ ...prev, priority: newPriority }));
+    };
+
+    const handleTaskUpdate = (updatedTask) => {
+        console.log("Updating task in Kanban:", updatedTask);
+    
+        setTasks((prevTasks) =>
+            prevTasks.map((task) => 
+                task.id === updatedTask.id ? { ...task, ...updatedTask } : task
+            )
+        );
+    };
+    
+    
+    
+
     return (
         <Box sx={{ padding: 3, backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
             <Typography variant="h3" sx={{ textAlign: "center", color: "#333", mb: 3 }}>
@@ -206,9 +223,11 @@ const Kanban = () => {
             )}
 
             {selectedTask && (
-                <Backdrop open={true} onClick={() => setSelectedTask(null)}>
-                    <TaskEditor task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={fetchTasks} />
-                </Backdrop>
+                <Backdrop open={true} onClick={(e) => e.stopPropagation()}>
+                <TaskEditor task={selectedTask} onClose={() => setSelectedTask(null)} onUpdate={handleTaskUpdate} />
+
+            </Backdrop>
+            
             )}
         </Box>
     );
