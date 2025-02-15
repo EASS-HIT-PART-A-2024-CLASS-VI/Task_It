@@ -29,7 +29,6 @@ class Task(TaskBase):
     id: int
     board_id: Optional[int]
 
-
     class Config:
         orm_mode = True
 
@@ -57,6 +56,9 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+
+    class Config:
+        from_attributes = True
 
 class LoginRequest(BaseModel):
     email: EmailStr

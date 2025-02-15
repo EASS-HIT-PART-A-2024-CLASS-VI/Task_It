@@ -115,3 +115,17 @@ def add_user_to_group(db: Session, user_id: int, group_id: int):
     db.commit()
     db.refresh(user)
     return user
+
+def remove_user_from_group(db: Session, user_id: int, group_id: int):
+    group = db.query(Group).filter(Group.id == group_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if group and user and user in group.members:
+        group.members.remove(user)
+        db.commit()
+
+def get_board_users(db: Session, board_id: int):
+    board = db.query(Group).filter(Group.id == board_id).first()
+    if not board:
+        return []
+    return board.members

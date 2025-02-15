@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from app.db import get_db
 from app.models import User
 from sqlalchemy.orm import Session
-from app.crud import create_user, get_user_by_email, verify_user
-from app.schemas import UserCreate
+from app.crud import create_user, get_user_by_email, verify_user, get_all_users as fetch_all_users
+from app.schemas import UserCreate, UserResponse
 from app.db import SessionLocal
 
 router = APIRouter()
@@ -20,6 +20,12 @@ def validate_user(email: str, password: str, db: Session):
     if not user or user.password != password:
         return None
     return user
+
+# Get all users
+@router.get("/", response_model=list[UserResponse])
+def get_all_users(db: Session = Depends(get_db)):
+    users = fetch_all_users(db)
+    return [{"id": user.id, "username": user.username, "email": user.email} for user in users]
 
 # Login Endpoint
 @router.post("/login")
@@ -41,3 +47,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     new_user = create_user(db=db, user=user)  # Plain password stored
     return {"message": "User created successfully", "user": {"email": new_user.email}}
 
+@router.get("/registered_users")
+def get_registered_users(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    return {"users": users}

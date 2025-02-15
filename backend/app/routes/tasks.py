@@ -83,18 +83,16 @@ def update_task(task_id: int, task_update: schemas.TaskUpdate, db: Session = Dep
 
 # 📌 שיוך משימה למשתמש
 @router.patch("/{task_id}/assign", response_model=schemas.Task)
-def assign_task(task_id: int, assignment: TaskAssign, db: Session = Depends(get_db)):
-    """
-    שיוך משימה למשתמש לפי `task_id`
-    """
-    user = crud.get_user_by_username(db, assignment.assigned_to)
-    if not user:
-        raise HTTPException(status_code=400, detail="User does not exist")
-    
-    task = crud.assign_task_to_user(db, task_id, assignment.assigned_to)
+def assign_task(task_id: int, assignment: schemas.TaskAssign, db: Session = Depends(get_db)):
+    task = crud.get_task_by_id(db, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
-    return task
+    
+    board_users = [user.username for user in crud.get_board_users(db, task.board_id)]
+    if assignment.assigned_to not in board_users and assignment.assigned_to != "Unassigned":
+        raise HTTPException(status_code=400, detail="User is not assigned to this board")
+
+    return crud.assign_task_to_user(db, task_id, assignment.assigned_to)
 
 # 📌 שליפת סטטיסטיקות של משימות
 @router.get("/dashboard", response_model=dict)

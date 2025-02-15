@@ -18,8 +18,7 @@ class Group(Base):
     __tablename__ = "groups"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
-    members = relationship("User", back_populates="group")
-
+    members = relationship("User", back_populates="group", lazy="joined")  # ✅ Group has many Users
     # Add task relationship
     tasks = relationship("Task", back_populates="board")
 
