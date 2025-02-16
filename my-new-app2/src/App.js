@@ -16,46 +16,57 @@ function App() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            console.log("❌ Not authenticated, skipping fetch.");
-            setLoading(false);
-            return;
-        }
-
-        const fetchData = async () => {
-            setLoading(true);
-            console.log("📡 Fetching boards from backend...");
-            try {
-                const response = await fetch("http://localhost:8000/api/groups", {
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error("Failed to fetch groups");
-                const data = await response.json();
-                console.log("✅ Fetched boards:", data);
-                setBoards(data);
-            } catch (error) {
-                console.error("❌ Error fetching groups:", error);
-            } finally {
+        const token = localStorage.getItem("token");
+    
+        if (token) {
+            console.log("🔄 Token found in storage, verifying...");
+            
+            fetch("http://localhost:8000/api/users/me", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Token invalid or expired");
+                return response.json();
+            })
+            .then(data => {
+                console.log("✅ Token valid, user authenticated:", data);
+                setIsAuthenticated(true);
+            })
+            .catch(error => {
+                console.error("❌ Invalid token:", error);
+                localStorage.removeItem("token");  // Clear expired token
+                setIsAuthenticated(false);
+            })
+            .finally(() => {
                 setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [isAuthenticated]);
-
+            });
+        } else {
+            console.log("❌ No token found, redirecting to login");
+            setIsAuthenticated(false);
+            setLoading(false);
+        }
+    }, []);
+    
     // ✅ Handle Login & Persist in LocalStorage
-    const handleLogin = (isAuth) => {
+    const handleLogin = (isAuth, token) => {
         console.log("🔑 Logging in, setting isAuthenticated:", isAuth);
         localStorage.setItem("isAuthenticated", isAuth);
+        localStorage.setItem("token", token); // ✅ Store JWT token
         setIsAuthenticated(isAuth);
     };
-
+    
     // ✅ Handle Logout
     const handleLogout = () => {
         console.log("🚪 Logging out...");
         localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("token"); // ✅ Remove JWT token
         setIsAuthenticated(false);
     };
+    
 
     console.log("🔥 Current state:", { isAuthenticated, loading, boards });
 
@@ -79,27 +90,31 @@ const AppContent = ({ isAuthenticated, loading, boards, onLogin, onLogout }) => 
 
     return (
         <div className="app">
-            {/* ✅ Sidebar is hidden on login & register */}
+            {/* ✅ Sidebar is hidden on login & register pages */}
             {!loading && isAuthenticated && !isAuthPage && (
                 <Sidebar boards={boards} onCreateBoard={() => {}} onLogout={onLogout} />
             )}
 
+            {/* ✅ Ensuring <Routes> only contains <Route> components */}
             <Routes>
                 <Route path="/login" element={<Login onLogin={onLogin} />} />
                 <Route path="/register" element={<Register />} />
 
-                {!loading && isAuthenticated ? (
-                    <>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/board/:boardId/*" element={<Board boards={boards} />} />
-                        <Route path="*" element={<Navigate to="/dashboard" />} />
-                    </>
-                ) : (
-                    <Route path="*" element={<Navigate to="/login" />} />
-                )}
+                {!loading ? (
+                    isAuthenticated ? (
+                        <>
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/board/:boardId/*" element={<Board boards={boards} />} />
+                            <Route path="*" element={<Navigate to="/dashboard" />} />
+                        </>
+                    ) : (
+                        <Route path="*" element={<Navigate to="/login" />} />
+                    )
+                ) : null}
             </Routes>
         </div>
     );
 };
+
 
 export default App;

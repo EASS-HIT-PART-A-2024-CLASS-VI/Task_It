@@ -1,23 +1,40 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import tasks, users, groups
+from dotenv import load_dotenv
+import os
 
-app = FastAPI()
+# Import routers
+from app.routes.users import router as user_router
+from app.routes.groups import router as group_router
+from app.routes.tasks import router as task_router
 
-# ✅ Enable CORS to allow requests from the frontend
+
+# Load environment variables
+load_dotenv()
+PORT = int(os.getenv("PORT", 8000))
+
+# Initialize FastAPI app
+app = FastAPI(title="Task Management API", version="1.0")
+
+# Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this if frontend runs elsewhere
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API routes
-app.include_router(users.router, prefix="/api/users", tags=["users"])
-app.include_router(tasks.router, prefix="/api/tasks", tags=["tasks"])
-app.include_router(groups.router, prefix="/api/groups", tags=["groups"])
+# Include routers
+app.include_router(user_router, prefix="/api/users", tags=["Users"])
+app.include_router(group_router, prefix="/api/groups", tags=["Groups"])
+app.include_router(task_router, prefix="/api/tasks", tags=["Tasks"])
 
 @app.get("/")
-def read_root():
-    return {"message": "Task Manager API is running"}
+async def root():
+    return {"message": "Welcome to the Task Management API 🚀"}
+
+# Run the application
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=PORT)

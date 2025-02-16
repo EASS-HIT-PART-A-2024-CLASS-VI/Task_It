@@ -13,20 +13,15 @@ function Register() {
         try {
             const response = await fetch("http://localhost:8000/api/users/signup", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    username,
-                    email,
-                    password
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 console.log("Registration successful:", data);
+                localStorage.setItem("token", data.access_token); // Store JWT
                 alert("Registration successful! Please log in.");
                 navigate("/login");
             } else {
@@ -73,9 +68,7 @@ function Register() {
                             required
                         />
                     </div>
-                    <button type="submit" className="register-button">
-                        Sign Up
-                    </button>
+                    <button type="submit" className="register-button">Sign Up</button>
                 </form>
             </div>
         </div>

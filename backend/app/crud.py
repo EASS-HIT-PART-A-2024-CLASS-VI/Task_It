@@ -1,131 +1,124 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from .models import Task, User, Group
-from .schemas import TaskCreate, TaskUpdate, UserCreate, GroupCreate
-from passlib.context import CryptContext
-from sqlalchemy.exc import IntegrityError
+from .db import db
+from bson import ObjectId
+from datetime import datetime
+from app.models import User, Group, Task
 
-from app import models
+### ✅ USER OPERATIONS ###
+async def create_user(user_data: User):
+    user = {
+        "_id": ObjectId(),
+        "username": user_data.username,
+        "email": user_data.email,
+        "hashed_password": user_data.hashed_password,
+        "groups": [],
+        "tasks": []
+    }
+    await db.users.insert_one(user)
+    return user
 
+async def get_user_by_email(email: str):
+    return await db.users.find_one({"email": email})
 
+async def get_user_by_id(user_id: str):
+    return await db.users.find_one({"_id": ObjectId(user_id)})
 
-# Tasks
-def get_tasks(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(Task).offset(skip).limit(limit).all()
+### ✅ GROUP OPERATIONS ###
+async def create_group(group_data: Group):
+    group = {
+        "_id": ObjectId(),
+        "name": group_data.name,
+        "created_by": ObjectId(group_data.created_by),
+        "members": [],
+        "tasks": []
+    }
+    await db.groups.insert_one(group)
+    return group
 
-def create_task(db: Session, task: TaskCreate, owner_id: int):
-    print(f"Creating task: {task.dict()}")  # ✅ Debugging line
-    db_task = Task(**task.dict(), owner_id=owner_id)
-    db.add(db_task)
-    db.commit()
-    db.refresh(db_task)
-    return db_task
-
-def update_task_status(db: Session, task_id: int, status: str):
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
-       raise HTTPException(status_code=404, detail="Task not found")
-    task.status = status
-    db.commit()
-    db.refresh(task)
-    return task
-
-def delete_task(db: Session, task_id: int):
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    db.delete(task)
-    db.commit()
-    return {"detail": "Task deleted successfully"}
-
-def assign_task_to_user(db: Session, task_id: int, username: str):
-    task = db.query(Task).filter(Task.id == task_id).first()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    task.assigned_to = username
-    db.commit()
-    db.refresh(task)
-    return task
-
-def list_tasks(db: Session, user_id: int = None):
-    if user_id:
-        return db.query(Task).filter(Task.assigned_to == user_id).all()
-    return db.query(Task).all()
-
-# Users
-def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
-
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
-
-def create_user(db: Session, user: UserCreate):
-    existing_user = db.query(User).filter(User.username == user.username).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already exists")
-    
-    db_user = User(
-        username=user.username,
-        email=user.email,
-        hashed_password=user.password
+async def add_user_to_group(user_id: str, group_id: str):
+    await db.groups.update_one(
+        {"_id": ObjectId(group_id)},
+        {"$push": {"members": ObjectId(user_id)}}
     )
-    try:
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Username or email already exists")
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$push": {"groups": ObjectId(group_id)}}
+    )
+    return {"message": "User added to group"}
 
-def verify_user(db: Session, email: str, password: str):
-    user = db.query(User).filter(User.email == email, User.hashed_password == password).first()
-    return user
+async def remove_user_from_group(group_id: str, user_id: str):
+    """
+    Remove a user from a group in MongoDB
+    """
+    result = await db.groups.update_one(
+        {"_id": ObjectId(group_id)},
+        {"$pull": {"members": ObjectId(user_id)}}
+    )
+    return result.modified_count > 0  # Returns True if update was successful
 
-def get_all_users(db: Session):
-    return db.query(User).all()
+async def get_group_by_id(group_id: str):
+    return await db.groups.find_one({"_id": ObjectId(group_id)})
 
-def get_user_by_id(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+### ✅ TASK OPERATIONS ###
+async def create_task(task_data: Task):
+    task = {
+        "_id": ObjectId(),
+        "title": task_data.title,
+        "description": task_data.description,
+        "status": task_data.status,
+        "priority": task_data.priority,
+        "deadline": task_data.deadline,
+        "created_at": datetime.utcnow(),
+        "board_id": ObjectId(task_data.board_id),
+        "owner_id": ObjectId(task_data.owner_id)
+    }
+    await db.tasks.insert_one(task)
 
-# Groups
-def get_all_groups(db: Session):
-    return db.query(Group).all()
+    # Update group and user references
+    await db.groups.update_one(
+        {"_id": ObjectId(task_data.board_id)},
+        {"$push": {"tasks": task["_id"]}}
+    )
+    await db.users.update_one(
+        {"_id": ObjectId(task_data.owner_id)},
+        {"$push": {"tasks": task["_id"]}}
+    )
 
-def create_group(db: Session, group: GroupCreate):
-    try:
-        new_group = models.Group(name=group.name)
-        db.add(new_group)
-        db.commit()
-        db.refresh(new_group)
-        return new_group
-    except Exception as e:
-        db.rollback()
-        raise e
+    return task
 
-def get_group_by_id(db: Session, group_id: int):
-    return db.query(Group).filter(Group.id == group_id).first()
+async def get_task_by_id(task_id: str):
+    return await db.tasks.find_one({"_id": ObjectId(task_id)})
 
-def add_user_to_group(db: Session, user_id: int, group_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-    group = db.query(Group).filter(Group.id == group_id).first()
-    if not user or not group:
-        return None
-    user.group_id = group.id
-    db.commit()
-    db.refresh(user)
-    return user
+async def update_task_status(task_id: str, status: str):
+    await db.tasks.update_one(
+        {"_id": ObjectId(task_id)},
+        {"$set": {"status": status}}
+    )
+    return {"message": "Task status updated"}
 
-def remove_user_from_group(db: Session, user_id: int, group_id: int):
-    group = db.query(Group).filter(Group.id == group_id).first()
-    user = db.query(User).filter(User.id == user_id).first()
+async def assign_task_to_user(task_id: str, user_id: str):
+    """
+    Assigns a task to a specific user in MongoDB
+    """
+    result = await db.tasks.update_one(
+        {"_id": ObjectId(task_id)},
+        {"$set": {"owner_id": ObjectId(user_id)}}
+    )
+    return result.modified_count > 0  # Returns True if update was successful
 
-    if group and user and user in group.members:
-        group.members.remove(user)
-        db.commit()
+async def delete_task(task_id: str):
+    task = await db.tasks.find_one({"_id": ObjectId(task_id)})
+    if not task:
+        return {"error": "Task not found"}
 
-def get_board_users(db: Session, board_id: int):
-    board = db.query(Group).filter(Group.id == board_id).first()
-    if not board:
-        return []
-    return board.members
+    # Remove task from group and user references
+    await db.groups.update_one(
+        {"_id": ObjectId(task["board_id"])},
+        {"$pull": {"tasks": ObjectId(task_id)}}
+    )
+    await db.users.update_one(
+        {"_id": ObjectId(task["owner_id"])},
+        {"$pull": {"tasks": ObjectId(task_id)}}
+    )
+
+    await db.tasks.delete_one({"_id": ObjectId(task_id)})
+    return {"message": "Task deleted"}

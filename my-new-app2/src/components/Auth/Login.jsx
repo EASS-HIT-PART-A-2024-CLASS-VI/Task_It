@@ -21,21 +21,22 @@ function Login({ onLogin }) {
                     password: password
                 }),
             });
-
+    
             const data = await response.json();
             if (response.ok) {
-                console.log("Login successful:", data);
-                localStorage.setItem("userId", data.id);
-                onLogin(true);
+                console.log("✅ Login successful:", data);
+                localStorage.setItem("token", data.access_token); // ✅ Store JWT
+                onLogin(true, data.access_token);  // ✅ Pass token
                 navigate("/dashboard");
             } else {
                 alert(data.detail || "Login failed");
             }
         } catch (error) {
-            console.error("Error during login:", error);
+            console.error("❌ Error during login:", error);
             alert("Something went wrong. Please try again.");
         }
     };
+    
 
     return (
         <div className="login-container">

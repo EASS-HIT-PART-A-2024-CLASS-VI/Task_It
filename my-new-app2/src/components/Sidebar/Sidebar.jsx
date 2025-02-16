@@ -5,67 +5,88 @@ import "./Sidebar.css";
 function Sidebar() {
     const [boards, setBoards] = useState([]);
     const [newBoardName, setNewBoardName] = useState("");
-
+    const userId = localStorage.getItem("userId");
+    console.log("🔑 User ID from LocalStorage:", userId);
     useEffect(() => {
         const fetchBoards = async () => {
             try {
-                const userId = localStorage.getItem("userId");
-                if (!userId) {
-                    console.error("User not logged in!");
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    console.error("❌ No JWT token found! User not authenticated.");
+                    alert("User is not authenticated!");
                     return;
                 }
-
-                const response = await fetch(`http://localhost:8000/api/groups/?created_by=${userId}`);
+        
+                console.log("🛠️ JWT Token from LocalStorage:", token); // ✅ Debugging
+        
+                const response = await fetch("http://localhost:8000/api/groups/", {
+                    method: "GET",
+                    headers: { 
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+        
                 if (!response.ok) {
-                    throw new Error("Failed to fetch boards!");
+                    throw new Error("Failed to fetch groups!");
                 }
-
+        
                 const data = await response.json();
                 setBoards(data);
             } catch (error) {
-                console.error("Error fetching boards:", error);
+                console.error("Error fetching groups:", error);
             }
-        };
-
+        };        
         fetchBoards();
     }, []);
-
+    
     const handleCreateBoard = async (e) => {
         e.preventDefault();
-
+    
         if (!newBoardName.trim()) {
             alert("Board name cannot be empty.");
             return;
         }
-
+    
         try {
-            const userId = localStorage.getItem("userId");
-            if (!userId) {
-                throw new Error("User not logged in!");
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("User not authenticated!");
             }
-
-            const payload = { name: newBoardName, created_by: parseInt(userId, 10) };
-            const response = await fetch("http://localhost:8000/api/groups", {
+    
+            const payload = { name: newBoardName };
+    
+            const response = await fetch("http://localhost:8000/api/groups/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(payload),
             });
-
+    
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.detail || "Failed to create board");
             }
-
+    
             const newBoard = await response.json();
-            setBoards((prevBoards) => [...prevBoards, newBoard]);
-            
-            setNewBoardName("");
+            console.log("✅ Board created:", newBoard);
+    
+            // ✅ Update UI immediately without needing a refresh
+            setBoards((prevBoards) => [
+                ...prevBoards,
+                { id: newBoard.group_id, name: newBoardName }
+            ]);
+    
+            setNewBoardName(""); // ✅ Reset input field
         } catch (error) {
             console.error("Error creating board:", error);
             alert(error.message || "An error occurred while creating the board.");
         }
     };
-
+    
+    
     return (
         <div className="sidebar">
             <h2>Planner</h2>
