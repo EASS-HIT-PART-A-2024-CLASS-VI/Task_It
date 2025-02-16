@@ -111,7 +111,6 @@ async def signup(user: UserCreate):
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-
 ### 📌 **Login Endpoint**
 @router.post("/login", response_model=Token)
 async def login(request: LoginRequest):
@@ -128,6 +127,7 @@ async def login(request: LoginRequest):
         "user_id": str(user["_id"])  # ✅ Include user_id in response
     }
 
+### 📌 **Get Current User (Protected)**
 @router.get("/me")
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     """ Verify JWT token and return user info """
@@ -153,3 +153,10 @@ async def get_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
     
     return {"id": str(user["_id"]), "username": user["username"], "email": user["email"]}
+
+### 📌 **Get All Users**
+@router.get("/", response_model=list)
+async def get_all_users():
+    """Retrieve all registered users"""
+    users = await db.users.find().to_list(length=100)
+    return [{"id": str(user["_id"]), "username": user["username"], "email": user["email"]} for user in users]

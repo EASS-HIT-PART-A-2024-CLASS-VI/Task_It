@@ -28,19 +28,14 @@ async def get_groups(user: dict = Depends(get_current_user)):
 
 # 📌 **Create New Group
 @router.post("/", response_model=dict)
-async def create_new_group(group: dict, user: dict = Depends(get_current_user)):
+async def create_new_group(group: GroupCreate, user: dict = Depends(get_current_user)):
     """Creates a new group and assigns the creator as the first member."""
-    
     if not user or "id" not in user:
-        logging.error(f"❌ User authentication failed, received: {user}")  # ✅ Debugging
         raise HTTPException(status_code=401, detail="User authentication failed")
 
-    logging.info(f"📌 Creating group for user: {user}")  # ✅ Debugging
-
-    # ✅ Use `_id` directly
     new_group = {
-        "name": group["name"],
-        "members": [user["id"]]  # ✅ Directly storing MongoDB ID
+        "name": group.name,
+        "members": [ObjectId(user["id"])]  # Automatically add creator
     }
 
     result = await db.groups.insert_one(new_group)
@@ -75,7 +70,6 @@ async def add_user(group_id: str, user_id: str):
         {"_id": ObjectId(group_id)},
         {"$push": {"members": ObjectId(user_id)}}
     )
-
     return {"message": f"User {user['username']} added to group {group['name']}"}
 
 
@@ -106,9 +100,21 @@ async def remove_user_from_group_api(group_id: str, user_id: str):
     if ObjectId(user_id) not in group["members"]:
         raise HTTPException(status_code=400, detail="User is not in this group")
 
+    # Remove user from group
     await db.groups.update_one(
         {"_id": ObjectId(group_id)},
         {"$pull": {"members": ObjectId(user_id)}}
     )
 
     return {"message": f"User {user['username']} removed from group {group['name']}"}  
+
+# 📌 **Delete Group**
+@router.delete("/{group_id}")
+async def delete_group(group_id: str):
+    """Deletes a group."""
+    group = await db.groups.find_one({"_id": ObjectId(group_id)})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    await db.groups.delete_one({"_id": ObjectId(group_id)})
+    return {"message": f"Group {group['name']} deleted successfully"}
