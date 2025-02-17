@@ -168,6 +168,26 @@ const Kanban = () => {
         }
     };
     
+    // Function to delete a task by ID
+    const deleteTask = async (taskId) => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch(`http://localhost:8000/api/tasks/${taskId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+            });
+
+            if (!response.ok) throw new Error("Failed to delete task");
+            
+            setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+            console.log(`Task with ID ${taskId} deleted successfully.`);
+        } catch (error) {
+            console.error("Error deleting task:", error);
+        }
+    };
 
 
     return (
