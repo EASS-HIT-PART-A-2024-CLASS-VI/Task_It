@@ -119,6 +119,11 @@ const Board = () => {
     
     // 📌 Remove User from Board
     const handleRemoveUser = async (userId) => {
+        if (!userId || userId === "undefined") {
+            console.error("🚨 Invalid userId provided:", userId);
+            alert("Invalid user selected for removal.");
+            return;
+        }    
         try {
             const token = localStorage.getItem("token");
     
@@ -172,7 +177,7 @@ const Board = () => {
                     {boardUsers.map(user => (
                         <ListItem key={user._id}>
                             <ListItemText primary={user.username} />
-                            <Button color="secondary" onClick={() => handleRemoveUser(user._id)}>Remove</Button>
+                            <Button color="secondary" onClick={() => handleRemoveUser(user.id)}>Remove</Button>
                         </ListItem>
                     ))}
                 </List>

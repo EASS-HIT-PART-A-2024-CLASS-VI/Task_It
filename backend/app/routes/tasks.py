@@ -22,6 +22,7 @@ class TaskCreate(BaseModel):
     status: str
     priority: str
     board_id: str  # ✅ This is a MongoDB ID (we will convert it)
+    deadline: Optional[datetime] # ✅ Accept deadline as a string
 
 # 📌 **Retrieve all tasks (filter by `board_id`)**
 @router.get("/", response_model=List[dict])
@@ -63,7 +64,15 @@ async def create_new_task(task: TaskCreate, user: dict = Depends(get_current_use
     if not board:
         raise HTTPException(status_code=404, detail=f"Board with ID {task.board_id} not found")
 
-    # ✅ Convert `board_id` and `created_by` to MongoDB ObjectId
+    # ✅ Convert deadline only if provided
+    deadline_dt = None
+    if task.deadline:
+        try:
+            deadline_dt = datetime.strptime(task.deadline, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid deadline format. Use YYYY-MM-DD")
+
+    # ✅ Prepare new task object
     new_task = {
         "title": task.title,
         "description": task.description or "",
@@ -72,10 +81,12 @@ async def create_new_task(task: TaskCreate, user: dict = Depends(get_current_use
         "board_id": ObjectId(task.board_id),
         "created_by": ObjectId(user["id"]),
         "created_at": datetime.utcnow(),
-        "deadline": datetime.strptime(task.deadline, "%Y-%m-%d").isoformat() if task.deadline else None
+        "deadline": deadline_dt  # ✅ Store as a `datetime` object for MongoDB
     }
 
+    # ✅ Insert into MongoDB
     result = await db.tasks.insert_one(new_task)
+
     return {"message": "Task created successfully", "task_id": str(result.inserted_id)}
 
 

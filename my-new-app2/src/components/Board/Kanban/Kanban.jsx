@@ -82,6 +82,7 @@ const Kanban = () => {
             status: "Not Started",
             priority: "Medium",
             board_id: boardId,
+            deadline: null
         };
     
         try {

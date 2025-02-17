@@ -105,7 +105,6 @@ async def remove_user_from_group_api(group_id: str, user_id: str):
         {"_id": ObjectId(group_id)},
         {"$pull": {"members": ObjectId(user_id)}}
     )
-
     return {"message": f"User {user['username']} removed from group {group['name']}"}  
 
 # 📌 **Delete Group**
