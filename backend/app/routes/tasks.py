@@ -44,7 +44,9 @@ async def get_tasks(board_id: str = Query(None)):
             "status": task["status"],
             "priority": task["priority"],
             "board_id": str(task["board_id"]),
-            "deadline": task.get("deadline", None)
+            "deadline": task.get("deadline", None),
+            "assigned_to": [str(user_id) for user_id in task.get("assigned_to", [])],
+            "created_by": str(task["created_by"]),
         }
         for task in tasks
     ]
@@ -89,8 +91,7 @@ async def create_new_task(task: TaskCreate, user: dict = Depends(get_current_use
 
     return {"message": "Task created successfully", "task_id": str(result.inserted_id)}
 
-
-# 📌 **Update a task**
+# 📌 Update a task
 @router.patch("/{task_id}", response_model=dict)
 async def update_task(task_id: str, task_update: dict):
     if not ObjectId.is_valid(task_id):
@@ -100,13 +101,28 @@ async def update_task(task_id: str, task_update: dict):
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    # ✅ Fix: Ensure deadline format before updating
+    # ✅ Validate deadline format before updating
     if "deadline" in task_update and task_update["deadline"]:
         try:
             task_update["deadline"] = datetime.strptime(task_update["deadline"], "%Y-%m-%d")
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid deadline format. Use YYYY-MM-DD")
 
+    # ✅ Ensure assigned users are in the board
+    if "assigned_to" in task_update and task_update["assigned_to"]:
+        board = await db.groups.find_one({"_id": ObjectId(task["board_id"])})
+        if not board:
+            raise HTTPException(status_code=404, detail="Board not found")
+
+        # Convert string IDs to ObjectIds and validate membership
+        assigned_user_ids = [ObjectId(user_id) for user_id in task_update["assigned_to"]]
+        board_member_ids = board["members"]
+
+        # Check if all assigned users are in the board
+        if not all(user_id in board_member_ids for user_id in assigned_user_ids):
+            raise HTTPException(status_code=400, detail="One or more users are not members of this board")
+
+    # ✅ Perform the update
     await db.tasks.update_one({"_id": ObjectId(task_id)}, {"$set": task_update})
 
     # ✅ Debugging log to check saved values

@@ -45,6 +45,7 @@ class Task(BaseModel):
     created_at: datetime = datetime.utcnow()  # Automatically set timestamp
     board_id: PyObjectId  # Reference to Group ID
     owner_id: PyObjectId  # Reference to User ID
+    assigned_to: List[PyObjectId] = []  # Store user references
 
     class Config:
         json_encoders = {ObjectId: str}

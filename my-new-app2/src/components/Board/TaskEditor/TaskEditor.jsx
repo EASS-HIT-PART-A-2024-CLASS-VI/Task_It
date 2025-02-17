@@ -11,23 +11,37 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
         description: "",
         priority: "Medium",
         status: "Not Started",
-        assigned_to: "",
+        assigned_to: [],
         deadline: "",
         board_id: null,
     });
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
+    const [boardUsers, setBoardUsers] = useState([]);
+    const boardId = task ? task.board_id : null;
+
 
     useEffect(() => {
         if (task) {
             console.log("📌 Loaded Task in Editor:", task);  // Debugging log
             setUpdatedTask({
                 ...task,
-                deadline: task.deadline ? task.deadline : "",  // Avoid unnecessary parsing
+                deadline: task.deadline ? task.deadline : "", // Avoid unnecessary parsing
+                assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : [], // Ensure array
             });
         }
     }, [task]);
     
+    useEffect(() => {
+        fetch(`http://localhost:8000/api/groups/${boardId}/users`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(response => response.json())
+        .then(data => setBoardUsers(Array.isArray(data) ? data : []))
+        .catch(error => console.error("❌ Error fetching board users:", error));
+    }, [boardId, token]);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -149,14 +163,32 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
             />
 
 
-            <TextField
-                fullWidth
-                label="Assigned To"
-                name="assigned_to"
-                value={updatedTask.assigned_to}
-                onChange={handleChange}
-                sx={{ mb: 3 }}
-            />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Assign To</InputLabel>
+                <Select
+                    multiple
+                    name="assigned_to"
+                    value={updatedTask.assigned_to || []}  // ✅ Ensure it's always an array
+                    onChange={(e) => {
+                        const selectedUsers = Array.isArray(e.target.value) ? e.target.value : [e.target.value];
+                        setUpdatedTask({ ...updatedTask, assigned_to: selectedUsers });
+                    }}
+                    renderValue={(selected) =>
+                        selected.map(userId => {
+                            const user = boardUsers.find(u => u.id === userId);
+                            return user ? user.username : userId;
+                        }).join(", ")
+                    }
+                >
+
+                    {boardUsers.map(user => (
+                        <MenuItem key={user.id} value={user.id}>
+                            {user.username} ({user.email})
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
 
             <Box display="flex" justifyContent="space-between">
                 <Button 
