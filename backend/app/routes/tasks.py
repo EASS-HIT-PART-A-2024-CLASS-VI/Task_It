@@ -1,7 +1,10 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from datetime import datetime
-from app.models import Task
+from bson import ObjectId
+from pydantic import BaseModel
+from typing import Optional, List
 from app.db import db
+from app.routes.users import get_current_user
 from app.crud import (
     create_task,
     get_task_by_id,
@@ -9,66 +12,108 @@ from app.crud import (
     assign_task_to_user,
     get_group_by_id
 )
-from bson import ObjectId
 
 router = APIRouter()
 
-# 📌 Retrieve all tasks (optional: filter by board_id)
-@router.get("/", response_model=list)
+# ✅ **Task Schema** (Pydantic)
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    status: str
+    priority: str
+    board_id: str  # ✅ This is a MongoDB ID (we will convert it)
+
+# 📌 **Retrieve all tasks (filter by `board_id`)**
+@router.get("/", response_model=List[dict])
 async def get_tasks(board_id: str = Query(None)):
     """
     Retrieve all tasks with an optional filter by `board_id`
     """
+    if board_id and not ObjectId.is_valid(board_id):
+        raise HTTPException(status_code=400, detail="Invalid board ID format")
+
     filter_query = {"board_id": ObjectId(board_id)} if board_id else {}
     tasks = await db.tasks.find(filter_query).to_list(length=100)
 
-    if not tasks:
-        raise HTTPException(status_code=404, detail=f"No tasks found{' for board ID ' + board_id if board_id else ''}")
+    return [
+        {
+            "id": str(task["_id"]),
+            "title": task["title"],
+            "description": task.get("description", ""),
+            "status": task["status"],
+            "priority": task["priority"],
+            "board_id": str(task["board_id"]),
+            "deadline": task.get("deadline", None)
+        }
+        for task in tasks
+    ]
 
-    return [{"id": str(task["_id"]), "title": task["title"], "status": task["status"]} for task in tasks]
 
-# 📌 Create a new task
+# 📌 **Create a new task**
 @router.post("/", response_model=dict)
-async def create_new_task(task: Task):
+async def create_new_task(task: TaskCreate, user: dict = Depends(get_current_user)):
     """
     Create a new task under a specific board (`board_id` is required)
     """
-    if not task.board_id:
-        raise HTTPException(status_code=400, detail="Board ID is required")
+    if not ObjectId.is_valid(task.board_id):
+        raise HTTPException(status_code=400, detail="Invalid board ID format")
 
-    # Validate if board exists
-    board = await get_group_by_id(str(task.board_id))
+    # Validate if the board exists
+    board = await get_group_by_id(task.board_id)
     if not board:
         raise HTTPException(status_code=404, detail=f"Board with ID {task.board_id} not found")
 
-    # Create task
-    new_task = await create_task(task)
-    return {"message": "Task created", "task_id": str(new_task["_id"])}
+    # ✅ Convert `board_id` and `created_by` to MongoDB ObjectId
+    new_task = {
+        "title": task.title,
+        "description": task.description or "",
+        "status": task.status,
+        "priority": task.priority,
+        "board_id": ObjectId(task.board_id),
+        "created_by": ObjectId(user["id"]),
+        "created_at": datetime.utcnow(),
+        "deadline": datetime.strptime(task.deadline, "%Y-%m-%d").isoformat() if task.deadline else None
+    }
 
-# 📌 Update task details
+    result = await db.tasks.insert_one(new_task)
+    return {"message": "Task created successfully", "task_id": str(result.inserted_id)}
+
+
+# 📌 **Update a task**
 @router.patch("/{task_id}", response_model=dict)
 async def update_task(task_id: str, task_update: dict):
-    """
-    Update task details (e.g., title, status, priority)
-    """
+    if not ObjectId.is_valid(task_id):
+        raise HTTPException(status_code=400, detail="Invalid task ID format")
+
     task = await get_task_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    # Update provided fields
-    update_fields = {k: v for k, v in task_update.items() if v is not None}
-    if "deadline" in update_fields:
-        update_fields["deadline"] = datetime.strptime(update_fields["deadline"], "%Y-%m-%dT%H:%M:%S")
+    # ✅ Fix: Ensure deadline format before updating
+    if "deadline" in task_update and task_update["deadline"]:
+        try:
+            task_update["deadline"] = datetime.strptime(task_update["deadline"], "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid deadline format. Use YYYY-MM-DD")
 
-    await db.tasks.update_one({"_id": ObjectId(task_id)}, {"$set": update_fields})
+    await db.tasks.update_one({"_id": ObjectId(task_id)}, {"$set": task_update})
+
+    # ✅ Debugging log to check saved values
+    updated_task = await get_task_by_id(task_id)
+    print(f"📌 Updated Task in DB: {updated_task}")
+
     return {"message": "Task updated successfully"}
 
-# 📌 Assign a task to a user
+
+# 📌 **Assign a task to a user**
 @router.patch("/{task_id}/assign", response_model=dict)
 async def assign_task(task_id: str, user_id: str):
     """
     Assign a task to a user (user must be in the same board)
     """
+    if not ObjectId.is_valid(task_id) or not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+
     task = await get_task_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -83,12 +128,16 @@ async def assign_task(task_id: str, user_id: str):
     await assign_task_to_user(task_id, user_id)
     return {"message": "Task assigned successfully"}
 
-# 📌 Retrieve task statistics (e.g., total tasks, status breakdown)
+
+# 📌 **Retrieve task statistics (Dashboard)**
 @router.get("/dashboard", response_model=dict)
 async def get_task_dashboard(board_id: str = Query(None)):
     """
     Retrieve task statistics for a board or the entire system
     """
+    if board_id and not ObjectId.is_valid(board_id):
+        raise HTTPException(status_code=400, detail="Invalid board ID format")
+
     filter_query = {"board_id": ObjectId(board_id)} if board_id else {}
     tasks = await db.tasks.find(filter_query).to_list(length=100)
 
@@ -100,12 +149,16 @@ async def get_task_dashboard(board_id: str = Query(None)):
     }
     return stats
 
-# 📌 Delete a task
+
+# 📌 **Delete a task**
 @router.delete("/{task_id}", response_model=dict)
 async def remove_task(task_id: str):
     """
     Delete a task by `task_id`
     """
+    if not ObjectId.is_valid(task_id):
+        raise HTTPException(status_code=400, detail="Invalid task ID format")
+
     task = await get_task_by_id(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")

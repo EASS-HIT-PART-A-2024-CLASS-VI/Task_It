@@ -1,78 +1,92 @@
 import React, { useState, useEffect } from "react";
 import {
-    Box, Typography, Paper, Button, TextField, MenuItem, Select, FormControl, InputLabel
+    Box, Typography, Paper, Button, TextField, MenuItem, 
+    Select, FormControl, InputLabel, Alert
 } from "@mui/material";
 
-const TaskEditor = ({ task, onClose, onUpdate = () => {} }) => {
-    const [updatedTask, setUpdatedTask] = useState({ 
-        title: "", 
-        description: "", 
-        priority: "Medium", 
-        status: "Pending",
+const TaskEditor = ({ task, onClose, onUpdate, token }) => {
+    const [updatedTask, setUpdatedTask] = useState({
+        id: "",  // Added id field
+        title: "",
+        description: "",
+        priority: "Medium",
+        status: "Not Started",
         assigned_to: "",
         deadline: "",
-        board_id: null,  // Ensure board_id is included
+        board_id: null,
     });
+    const [error, setError] = useState("");
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (task) {
+            console.log("📌 Loaded Task in Editor:", task);  // Debugging log
             setUpdatedTask({
                 ...task,
-                status: task.status === "Pending" ? "Not Started" : task.status,  // ✅ Map "Pending" to "Not Started"
+                deadline: task.deadline ? task.deadline : "",  // Avoid unnecessary parsing
             });
         }
     }, [task]);
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setUpdatedTask((prevTask) => ({ ...prevTask, [name]: value }));
+        setUpdatedTask(prev => ({ ...prev, [name]: value }));
+        setError("");
     };
 
     const handleSave = async () => {
         if (!updatedTask.title.trim()) {
-            alert("Task title cannot be empty.");
+            setError("Title is required");
             return;
         }
     
+        setSaving(true);
         try {
-            const payload = {
+            // ✅ Ensure deadline is sent in `YYYY-MM-DD` format
+            const formattedDeadline = updatedTask.deadline 
+                ? new Date(updatedTask.deadline).toISOString().split('T')[0] // 🔥 Extracts `YYYY-MM-DD`
+                : null;
+    
+            const updatePayload = {
+                id: updatedTask.id,
                 title: updatedTask.title,
                 description: updatedTask.description,
-                priority: updatedTask.priority,
                 status: updatedTask.status,
-                deadline: updatedTask.deadline || null,
-                assigned_to: updatedTask.assigned_to || null,
-                board_id: updatedTask.board_id || task.board_id,  // ✅ Ensure board_id is included
+                priority: updatedTask.priority,
+                assigned_to: updatedTask.assigned_to,
+                deadline: formattedDeadline,  // ✅ Correct format
             };
     
-            const response = await fetch(`http://localhost:8000/api/tasks/${task.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
+            console.log("📌 Sending Task Update:", updatePayload);
     
-            if (!response.ok) {
-                throw new Error("Failed to update task");
-            }
-    
-            const updatedData = await response.json();
-            console.log("Updated task:", updatedData);
-    
-            if (typeof onUpdate === "function") {
-                onUpdate(updatedData);  // ✅ Refresh Kanban Board after saving
-            }
-    
-            onClose();
+            await onUpdate(updatePayload);
         } catch (error) {
-            console.error("Error updating task:", error);
-            alert(error.message);
+            setError(error.message);
+        } finally {
+            setSaving(false);
         }
     };
     
+    
 
     return (
-        <Paper elevation={4} sx={{ padding: 3, maxWidth: 500, margin: "auto", backgroundColor: "white" }}>
-            <Typography variant="h6">Edit Task</Typography>
+        <Paper 
+            elevation={4} 
+            sx={{ 
+                p: 3,
+                maxWidth: 500,
+                margin: "auto",
+                backgroundColor: "background.paper"
+            }}
+        >
+            <Typography variant="h6" sx={{ mb: 2 }}>Edit Task</Typography>
+            
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
             
             <TextField
                 fullWidth
@@ -80,7 +94,8 @@ const TaskEditor = ({ task, onClose, onUpdate = () => {} }) => {
                 name="title"
                 value={updatedTask.title}
                 onChange={handleChange}
-                margin="dense"
+                required
+                sx={{ mb: 2 }}
             />
             
             <TextField
@@ -91,21 +106,31 @@ const TaskEditor = ({ task, onClose, onUpdate = () => {} }) => {
                 rows={3}
                 value={updatedTask.description}
                 onChange={handleChange}
-                margin="dense"
+                sx={{ mb: 2 }}
             />
 
-            <FormControl fullWidth margin="dense">
+            <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Priority</InputLabel>
-                <Select name="priority" value={updatedTask.priority} onChange={handleChange}>
+                <Select
+                    name="priority"
+                    value={updatedTask.priority}
+                    onChange={handleChange}
+                    label="Priority"
+                >
                     <MenuItem value="Low">Low</MenuItem>
                     <MenuItem value="Medium">Medium</MenuItem>
                     <MenuItem value="High">High</MenuItem>
                 </Select>
             </FormControl>
 
-            <FormControl fullWidth margin="dense">
+            <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel>Status</InputLabel>
-                <Select name="status" value={updatedTask.status} onChange={handleChange}>
+                <Select
+                    name="status"
+                    value={updatedTask.status}
+                    onChange={handleChange}
+                    label="Status"
+                >
                     <MenuItem value="Not Started">Not Started</MenuItem>
                     <MenuItem value="Working on It">Working on It</MenuItem>
                     <MenuItem value="Done">Done</MenuItem>
@@ -118,10 +143,11 @@ const TaskEditor = ({ task, onClose, onUpdate = () => {} }) => {
                 label="Deadline"
                 name="deadline"
                 InputLabelProps={{ shrink: true }}
-                value={updatedTask.deadline || ""}
+                value={updatedTask.deadline || ""}  // Ensure empty string instead of undefined
                 onChange={handleChange}
-                margin="dense"
+                sx={{ mb: 2 }}
             />
+
 
             <TextField
                 fullWidth
@@ -129,12 +155,25 @@ const TaskEditor = ({ task, onClose, onUpdate = () => {} }) => {
                 name="assigned_to"
                 value={updatedTask.assigned_to}
                 onChange={handleChange}
-                margin="dense"
+                sx={{ mb: 3 }}
             />
 
-            <Box display="flex" justifyContent="space-between" mt={2}>
-                <Button onClick={onClose} color="secondary">Cancel</Button>
-                <Button onClick={handleSave} variant="contained" color="primary">Save</Button>
+            <Box display="flex" justifyContent="space-between">
+                <Button 
+                    onClick={onClose} 
+                    color="secondary" 
+                    disabled={saving}
+                >
+                    Cancel
+                </Button>
+                <Button 
+                    onClick={handleSave} 
+                    variant="contained" 
+                    color="primary"
+                    disabled={saving}
+                >
+                    {saving ? "Saving..." : "Save"}
+                </Button>
             </Box>
         </Paper>
     );

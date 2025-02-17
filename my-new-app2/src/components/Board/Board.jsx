@@ -140,7 +140,6 @@ const Board = () => {
         }
     };
     
-
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
             {/* 📌 Sidebar */}
