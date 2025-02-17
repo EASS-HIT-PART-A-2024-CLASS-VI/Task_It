@@ -72,7 +72,6 @@ async def add_user(group_id: str, user_id: str):
     )
     return {"message": f"User {user['username']} added to group {group['name']}"}
 
-
 # 📌 **Get Users in a Group**
 @router.get("/{group_id}/users")
 async def get_group_users(group_id: str):
@@ -99,6 +98,9 @@ async def remove_user_from_group_api(group_id: str, user_id: str):
 
     if ObjectId(user_id) not in group["members"]:
         raise HTTPException(status_code=400, detail="User is not in this group")
+    
+    if ObjectId(user_id) == ObjectId(group["members"][0]):
+        raise HTTPException(status_code=400, detail="Cannot remove group creator")
 
     # Remove user from group
     await db.groups.update_one(
