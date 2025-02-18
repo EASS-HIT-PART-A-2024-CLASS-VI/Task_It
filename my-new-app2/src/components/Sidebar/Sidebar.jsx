@@ -1,13 +1,16 @@
 ﻿import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
+import { Avatar } from 'flowbite-react';
 
 function Sidebar() {
     const [boards, setBoards] = useState([]);
     const [newBoardName, setNewBoardName] = useState("");
     const userId = localStorage.getItem("userId");
+    const decodedToken = JSON.parse(localStorage.getItem("user") || "{}");
+
     console.log("🔑 User ID from LocalStorage:", userId);
-    
+    console.log("🔑 Decoded Token from LocalStorage:", decodedToken);
     useEffect(() => {
         const fetchBoards = async () => {
             try {
@@ -91,6 +94,14 @@ function Sidebar() {
     return (
         <div className="sidebar">
             <h2>Planner</h2>
+            {/* <div className="user-profile">
+            <Avatar
+                img={`http://localhost:8000${decodedToken.photo}`}
+                alt="User Avatar"
+                rounded
+                bordered
+                size="md" // You can adjust the size (xs, sm, md, lg, xl)
+            /> */}
             <div className="menu">
                 <NavLink to="/dashboard" className="menu-item">
                     🏠 Dashboard

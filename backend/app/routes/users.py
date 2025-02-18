@@ -13,7 +13,7 @@ import os
 import shutil
 
 # Create an uploads folder
-UPLOAD_FOLDER = "uploads/user_photos"
+UPLOAD_FOLDER = "static/profile_pics"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Create a router instance
@@ -46,13 +46,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """ Verifies a password against its hash. """
     return pwd_context.verify(plain_password, hashed_password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, user: dict, expires_delta: Optional[timedelta] = None):
     """ Generates a JWT token. """
     to_encode = data.copy()
     
     if "sub" not in to_encode:
         raise ValueError("❌ 'sub' field missing in JWT payload!")
-
+    
+    to_encode.update({
+        "user_id": str(user["_id"]),  # Convert ObjectId to string
+        "username": user["username"],
+        "photo": user["photo"] if "photo" in user else None
+    })
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     
@@ -92,7 +97,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         user_data = {
             "id": user["_id"],  # **MongoDB ID as ObjectId**
             "username": user["username"],
-            "email": user["email"]
+            "email": user["email"],
+            "photo": user.get("photo")
         }
         logging.info(f"✅ Token valid, user authenticated: {user_data}")
         return user_data
@@ -146,7 +152,7 @@ async def signup(
     }
 
     await db.users.insert_one(new_user)
-    access_token = create_access_token(data={"sub": email})
+    access_token = create_access_token(data={"sub": email}, user=new_user)
 
     return {"access_token": access_token, "token_type": "bearer", "photo_url": photo_url}
 
@@ -158,7 +164,7 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     # Generate JWT Token
-    access_token = create_access_token(data={"sub": request.email})
+    access_token = create_access_token(data={"sub": request.email}, user=user)
     
     return {
         "access_token": access_token,
@@ -182,7 +188,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return {"id": str(user["_id"]), "username": user["username"], "email": user["email"]}
+    return {"id": str(user["_id"]), "username": user["username"], "email": user["email"], "photo": user.get("photo")}
 
 ### 📌 **Get User Info (Protected)**
 @router.get("/{user_id}")
@@ -191,7 +197,7 @@ async def get_user(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"id": str(user["_id"]), "username": user["username"], "email": user["email"]}
+    return {"id": str(user["_id"]), "username": user["username"], "email": user["email"], "photo": user.get("photo"), "first_name": user["first_name"], "last_name": user["last_name"]}
 
 ### 📌 **Get All Users**
 @router.get("/", response_model=list)

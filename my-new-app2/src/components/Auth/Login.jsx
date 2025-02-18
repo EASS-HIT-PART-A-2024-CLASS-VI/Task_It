@@ -1,5 +1,6 @@
 ﻿import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 import "./Login.css";
 
 function Login({ onLogin }) {
@@ -25,7 +26,16 @@ function Login({ onLogin }) {
             const data = await response.json();
             if (response.ok) {
                 console.log("✅ Login successful:", data);
+
                 localStorage.setItem("token", data.access_token); // ✅ Store JWT
+                //✅ Decode JWT token
+                const decoded = jwtDecode(data.access_token);
+                
+                console.log("🔑 Decoded JWT Token:", decoded);
+
+                //✅  Store user details in local storage
+                localStorage.setItem("user", JSON.stringify(decoded));
+
                 onLogin(true, data.access_token);  // ✅ Pass token
                 navigate("/dashboard");
             } else {

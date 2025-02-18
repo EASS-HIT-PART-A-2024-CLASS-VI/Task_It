@@ -10,6 +10,10 @@ from app.routes.groups import router as group_router
 from app.routes.tasks import router as task_router
 
 
+# Ensure the 'static' directory exists
+STATIC_FOLDER = "static/profile_pics"
+os.makedirs(STATIC_FOLDER, exist_ok=True)
+
 # Load environment variables
 load_dotenv()
 PORT = int(os.getenv("PORT", 8000))
@@ -27,7 +31,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.mount("/static", StaticFiles(directory="uploads"), name="static")
+app.mount("/static/profile_pics", StaticFiles(directory="static/profile_pics"), name="static")
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(group_router, prefix="/api/groups", tags=["Groups"])
 app.include_router(task_router, prefix="/api/tasks", tags=["Tasks"])
