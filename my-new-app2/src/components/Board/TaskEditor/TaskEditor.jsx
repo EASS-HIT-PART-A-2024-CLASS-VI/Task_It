@@ -30,7 +30,7 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
                 assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : [], // Ensure array
             });
         }
-    }, [task]);
+    }, [task],[task?.assigned_to]);
     
     useEffect(() => {
         fetch(`http://localhost:8000/api/groups/${boardId}/users`, {

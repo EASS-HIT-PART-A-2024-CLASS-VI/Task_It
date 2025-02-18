@@ -31,7 +31,7 @@ const Board = () => {
     const [showUserList, setShowUserList] = useState(false);
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
-
+    const [refreshKey, setRefreshKey] = useState(0);
     // 📌 Fetch Board Details (Including Name)
     useEffect(() => {
         fetch(`http://localhost:8000/api/groups/${boardId}`, {
@@ -117,35 +117,35 @@ const Board = () => {
         }
     };
     
-    // 📌 Remove User from Board
+    // 📌 Remove User from Board & Update UI
     const handleRemoveUser = async (userId) => {
-        if (!userId || userId === "undefined") {
-            console.error("🚨 Invalid userId provided:", userId);
-            alert("Invalid user selected for removal.");
-            return;
-        }    
         try {
-            const token = localStorage.getItem("token");
-    
             const response = await fetch(`http://localhost:8000/api/groups/${boardId}/remove_user/${userId}`, {
                 method: "DELETE",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
                     "Content-Type": "application/json"
                 }
             });
+
             if (!response.ok) throw new Error("Failed to remove user");
 
-            // ✅ Trigger an event in `localStorage` for Kanban to listen
-            localStorage.setItem("refreshTasks", Date.now().toString());
-            
-            // Update UI
-            setBoardUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
+            // ✅ Update state + Force refresh
+            setBoardUsers(prevUsers => [...prevUsers.filter(user => user.id !== userId)]);
+            setTasks(prevTasks => prevTasks.map(task => ({
+                ...task,
+                assigned_to: task.assigned_to.filter(id => id !== userId)
+            })));
+
+            setRefreshKey(prev => prev + 1);  // 🔄 Force UI refresh
+
         } catch (error) {
             console.error("Error removing user:", error);
             alert("Could not remove user.");
         }
     };
+
+
     
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>

@@ -18,6 +18,7 @@ const Kanban = () => {
     const [openTaskModal, setOpenTaskModal] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [newTaskDescription, setNewTaskDescription] = useState("");
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const token = localStorage.getItem("token") || "";
     if (!token) {
@@ -283,6 +284,7 @@ const Kanban = () => {
                 }}>
                     {selectedTask && (
                         <TaskEditor
+                            key={refreshKey}
                             task={selectedTask}
                             onClose={() => setOpenEditor(false)}
                             onUpdate={handleTaskUpdate}

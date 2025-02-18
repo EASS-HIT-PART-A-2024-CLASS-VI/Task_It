@@ -37,7 +37,8 @@ async def create_new_group(group: GroupCreate, user: dict = Depends(get_current_
 
     new_group = {
         "name": group.name,
-        "members": [ObjectId(user["id"])]  # Automatically add creator
+        "members": [ObjectId(user["id"])], # Automatically add creator
+        "created_by": ObjectId(user["id"])  # Store the creator's ID
     }
 
     result = await db.groups.insert_one(new_group)
@@ -165,41 +166,57 @@ async def get_group_users(group_id: str):
 
     return [{"id": str(user["_id"]), "username": user["username"], "email": user["email"]} for user in users]
 
-# 📌 **Remove User from Group**
+# 📌 **Remove User from Group & Unassign from Tasks**
 @router.delete("/{group_id}/remove_user/{user_id}")
 async def remove_user_from_group_api(group_id: str, user_id: str):
-    """Removes a user from a group."""
-    group = await db.groups.find_one({"_id": ObjectId(group_id)})
+    """Removes a user from a group and all assigned tasks."""
+
+    # ✅ Ensure valid ObjectId format
+    try:
+        group_oid = ObjectId(group_id)
+        user_oid = ObjectId(user_id)  # Convert to ObjectId
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid ObjectId format")
+
+    # ✅ Find the group
+    group = await db.groups.find_one({"_id": group_oid})
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    # ✅ Find the user
+    user = await db.users.find_one({"_id": user_oid})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if ObjectId(user_id) not in group["members"]:
-        raise HTTPException(status_code=400, detail="User is not in this group")
+    # ✅ Prevent group creator from being removed
+    if "created_by" in group and str(group["created_by"]) == str(user_id):
+        raise HTTPException(status_code=400, detail="Cannot remove the group creator")
+
+    # ✅ Ensure the user is in the group
+    if str(user_id) not in [str(member) for member in group["members"]]:
+        raise HTTPException(status_code=400, detail="User is not a member of this group")
     
-    if ObjectId(user_id) == ObjectId(group["members"][0]):
-        raise HTTPException(status_code=400, detail="Cannot remove group creator")
-
-     # Unassign user from all tasks in this group
+    # ✅ **Unassign user from ALL TASKS (convert IDs to match stored format)**
     task_update_result = await db.tasks.update_many(
-        {"board_id": ObjectId(group_id)},
-        {"$pull": {"assigned_to": ObjectId(user_id)}}
+        {"board_id": group_oid},  # Filter for tasks in the correct board
+        {"$pull": {"assigned_to": str(user_id)}}  # Ensure user ID format matches the database
     )
-    if task_update_result.modified_count > 0:
-        logger.info(f"✅ User {user_id} unassigned from {task_update_result.modified_count} tasks in group {group_id}.")
-    else:
-        logging.warning(f"⚠️ No tasks were updated for user {user_id} in group {group_id}.")
 
-    # Remove user from group
-    await db.groups.update_one(
-        {"_id": ObjectId(group_id)},
-        {"$pull": {"members": ObjectId(user_id)}}
+    if task_update_result.modified_count > 0:
+        logging.info(f"✅ User {user_id} unassigned from {task_update_result.modified_count} tasks in group {group_id}.")
+    else:
+        logging.warning(f"⚠️ No tasks updated. User may not have been assigned.")
+
+    # ✅ **Remove user from the group**
+    group_update_result = await db.groups.update_one(
+        {"_id": group_oid},
+        {"$pull": {"members": user_oid}}
     )
-   
-    return {"message": f"User {user['username']} removed from group {group['name']}"}  
+
+    if group_update_result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to remove user from group.")
+
+    return {"message": f"User {user['username']} removed from group {group['name']} and all assigned tasks."}
 
 # 📌 **Delete Group**
 @router.delete("/{group_id}")
