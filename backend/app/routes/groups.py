@@ -21,10 +21,11 @@ async def get_groups(user: dict = Depends(get_current_user)):
     if not user or "id" not in user:
         logging.error(f"❌ User authentication failed, received: {user}")  # ✅ Debugging
         raise HTTPException(status_code=401, detail="User authentication failed")
-
+    # Convert user ID to ObjectId
+    user_id=ObjectId(user["id"])
     # ✅ Query MongoDB using `_id`
-    groups = await db.groups.find({"members": user["id"]}).to_list(length=100)
-
+    groups = await db.groups.find({"members": user_id}).to_list(length=100)
+    logging.info(f"📌 Found {len(groups)} groups for user {user['username']}")
     return [{"id": str(group["_id"]), "name": group["name"]} for group in groups]
 
 # 📌 **Create New Group

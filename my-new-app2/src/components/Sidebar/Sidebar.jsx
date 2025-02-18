@@ -7,6 +7,7 @@ function Sidebar() {
     const [newBoardName, setNewBoardName] = useState("");
     const userId = localStorage.getItem("userId");
     console.log("🔑 User ID from LocalStorage:", userId);
+    
     useEffect(() => {
         const fetchBoards = async () => {
             try {
