@@ -134,9 +134,11 @@ const Board = () => {
                     "Content-Type": "application/json"
                 }
             });
-    
             if (!response.ok) throw new Error("Failed to remove user");
-    
+
+            // ✅ Trigger an event in `localStorage` for Kanban to listen
+            localStorage.setItem("refreshTasks", Date.now().toString());
+            
             // Update UI
             setBoardUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
         } catch (error) {

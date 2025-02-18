@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Path, logger,  Query
 from pydantic import BaseModel
 from bson import ObjectId
 from app.routes.users import get_current_user
 from app.db import db  # MongoDB connection
 import logging
+from typing import Dict,List
 
 router = APIRouter()
 
@@ -51,6 +52,85 @@ async def get_group(group_id: str):
 
     return {"id": str(group["_id"]), "name": group["name"], "members": [str(m) for m in group["members"]]}
 
+# 📌 **Retrieve Board Dashboard Data**
+@router.get("/{group_id}/dashboard", response_model=Dict)
+async def get_board_dashboard(group_id: str = Path(...)):
+    """
+    Retrieve comprehensive task statistics for a board.
+    """
+    if not group_id or not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid board ID format")
+
+    board = await db.groups.find_one({"_id": ObjectId(group_id)})
+    if not board:
+        raise HTTPException(status_code=404, detail="Board not found")
+
+    # ✅ Fetch all tasks for this board
+    tasks = await db.tasks.find({"board_id": ObjectId(group_id)}).to_list(length=500)
+
+    # ✅ Task Count by Status
+    status_counts = {
+        "not_started": sum(1 for task in tasks if task["status"] == "Not Started"),
+        "working_on_it": sum(1 for task in tasks if task["status"] == "Working on It"),
+        "done": sum(1 for task in tasks if task["status"] == "Done"),
+    }
+
+    # ✅ Task Count by Priority
+    priority_counts = {
+        "high": sum(1 for task in tasks if task["priority"] == "High"),
+        "medium": sum(1 for task in tasks if task["priority"] == "Medium"),
+        "low": sum(1 for task in tasks if task["priority"] == "Low"),
+    }
+
+    # ✅ Tasks Assigned to Users
+    user_task_counts = {}
+    for task in tasks:
+        for user_id in task.get("assigned_to", []):
+            user_task_counts[user_id] = user_task_counts.get(user_id, {"high": 0, "medium": 0, "low": 0})
+            user_task_counts[user_id][task["priority"].lower()] += 1
+
+    # ✅ Fetch Usernames for Assigned Tasks
+    user_ids = list(user_task_counts.keys())
+    users = await db.users.find({"_id": {"$in": [ObjectId(uid) for uid in user_ids]}}).to_list(length=100)
+
+    # ✅ Format Assigned Tasks by Username
+    assigned_tasks = [
+        {
+            "name": user["username"],
+            "high": user_task_counts.get(str(user["_id"]), {}).get("high", 0),
+            "medium": user_task_counts.get(str(user["_id"]), {}).get("medium", 0),
+            "low": user_task_counts.get(str(user["_id"]), {}).get("low", 0),
+        }
+        for user in users
+    ]
+
+    # ✅ Priority Breakdown Per Status
+    priority_breakdown = {
+        "high": {
+            "not_started": sum(1 for task in tasks if task["priority"] == "High" and task["status"] == "Not Started"),
+            "working_on_it": sum(1 for task in tasks if task["priority"] == "High" and task["status"] == "Working on It"),
+            "done": sum(1 for task in tasks if task["priority"] == "High" and task["status"] == "Done"),
+        },
+        "medium": {
+            "not_started": sum(1 for task in tasks if task["priority"] == "Medium" and task["status"] == "Not Started"),
+            "working_on_it": sum(1 for task in tasks if task["priority"] == "Medium" and task["status"] == "Working on It"),
+            "done": sum(1 for task in tasks if task["priority"] == "Medium" and task["status"] == "Done"),
+        },
+        "low": {
+            "not_started": sum(1 for task in tasks if task["priority"] == "Low" and task["status"] == "Not Started"),
+            "working_on_it": sum(1 for task in tasks if task["priority"] == "Low" and task["status"] == "Working on It"),
+            "done": sum(1 for task in tasks if task["priority"] == "Low" and task["status"] == "Done"),
+        },
+    }
+
+    return {
+        "total": len(tasks),
+        "status_counts": status_counts,
+        "priority_counts": priority_counts,
+        "assigned_tasks": assigned_tasks,
+        "priority_breakdown": priority_breakdown,
+    }
+   
 # 📌 **Add User to Group**
 @router.patch("/{group_id}/add_user/{user_id}")
 async def add_user(group_id: str, user_id: str):
@@ -102,11 +182,22 @@ async def remove_user_from_group_api(group_id: str, user_id: str):
     if ObjectId(user_id) == ObjectId(group["members"][0]):
         raise HTTPException(status_code=400, detail="Cannot remove group creator")
 
+     # Unassign user from all tasks in this group
+    task_update_result = await db.tasks.update_many(
+        {"board_id": ObjectId(group_id)},
+        {"$pull": {"assigned_to": ObjectId(user_id)}}
+    )
+    if task_update_result.modified_count > 0:
+        logger.info(f"✅ User {user_id} unassigned from {task_update_result.modified_count} tasks in group {group_id}.")
+    else:
+        logging.warning(f"⚠️ No tasks were updated for user {user_id} in group {group_id}.")
+
     # Remove user from group
     await db.groups.update_one(
         {"_id": ObjectId(group_id)},
         {"$pull": {"members": ObjectId(user_id)}}
     )
+   
     return {"message": f"User {user['username']} removed from group {group['name']}"}  
 
 # 📌 **Delete Group**
@@ -119,3 +210,4 @@ async def delete_group(group_id: str):
 
     await db.groups.delete_one({"_id": ObjectId(group_id)})
     return {"message": f"Group {group['name']} deleted successfully"}
+

@@ -44,7 +44,7 @@ class Task(BaseModel):
     deadline: Optional[datetime] = None
     created_at: datetime = datetime.utcnow()  # Automatically set timestamp
     board_id: PyObjectId  # Reference to Group ID
-    owner_id: PyObjectId  # Reference to User ID
+    created_by: PyObjectId  # Reference to User ID
     assigned_to: List[PyObjectId] = []  # Store user references
 
     class Config:

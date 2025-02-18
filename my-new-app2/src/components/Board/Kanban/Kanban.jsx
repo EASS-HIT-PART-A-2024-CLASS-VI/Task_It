@@ -4,6 +4,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useParams } from "react-router-dom";
 import TaskEditor from "../TaskEditor/TaskEditor";
@@ -57,6 +58,19 @@ const Kanban = () => {
         fetchTasks();
     }, [fetchTasks]);
 
+    // ✅ Listen for task refresh event from `localStorage`
+    useEffect(() => {
+        const handleStorageEvent = (event) => {
+            if (event.key === "refreshTasks") {
+                fetchTasks(); // ✅ Refetch tasks when triggered
+            }
+        };
+
+        window.addEventListener("storage", handleStorageEvent);
+        return () => window.removeEventListener("storage", handleStorageEvent);
+    }, []);
+
+    // Function to get priority color
     const getPriorityColor = (priority) => {
         switch (priority?.toLowerCase()) {
             case 'high':
@@ -70,6 +84,7 @@ const Kanban = () => {
         }
     };
 
+    // Function to create a new task
     const handleTaskCreate = async () => {
         if (!newTaskTitle.trim()) {
             alert("Task title cannot be empty!");
@@ -109,6 +124,7 @@ const Kanban = () => {
         }
     };
     
+    // Function to update task status
     const handleDragEnd = async (result) => {
         if (!result.destination) return;
     
@@ -132,6 +148,7 @@ const Kanban = () => {
         }
     };
 
+    // Function to update a task by ID
     const handleTaskUpdate = async (updatedTaskData) => {
         try {
             const formattedDeadline = updatedTaskData.deadline
@@ -167,7 +184,7 @@ const Kanban = () => {
             alert("Failed to update task. Please try again.");
         }
     };
-    
+
     // Function to delete a task by ID
     const deleteTask = async (taskId) => {
         const token = localStorage.getItem("token");
@@ -305,7 +322,7 @@ const Kanban = () => {
                                                     key={task.id} 
                                                     draggableId={task.id} 
                                                     index={index}
-                                                >
+                                                >   
                                                     {(provided) => (
                                                         <Paper
                                                             ref={provided.innerRef}
@@ -344,6 +361,17 @@ const Kanban = () => {
                                                                     sx={{ ml: 1 }}
                                                                 />
                                                             )}
+                                                            <IconButton
+                                                                aria-label="delete"
+                                                                onClick={(event) => {
+                                                                    event.stopPropagation(); // ✅ Prevents opening Task Editor
+                                                                    deleteTask(task.id);
+                                                                }}
+                                                                size="small"
+                                                                sx={{ color: "red" }}
+                                                            >
+                                                                <DeleteIcon />
+                                                            </IconButton>
                                                         </Paper>
                                                     )}
                                                 </Draggable>

@@ -51,7 +51,6 @@ async def get_tasks(board_id: str = Query(None)):
         for task in tasks
     ]
 
-
 # 📌 **Create a new task**
 @router.post("/", response_model=dict)
 async def create_new_task(task: TaskCreate, user: dict = Depends(get_current_user)):
@@ -155,27 +154,24 @@ async def assign_task(task_id: str, user_id: str):
     await assign_task_to_user(task_id, user_id)
     return {"message": "Task assigned successfully"}
 
-
-# 📌 **Retrieve task statistics (Dashboard)**
-@router.get("/dashboard", response_model=dict)
-async def get_task_dashboard(board_id: str = Query(None)):
+# 📌 **Unassign a task from a user**
+@router.patch("/{user_id}", response_model=dict)
+async def unassign_task(task_id: str, user_id: str):
     """
-    Retrieve task statistics for a board or the entire system
+    Unassign a task from a user
     """
-    if board_id and not ObjectId.is_valid(board_id):
-        raise HTTPException(status_code=400, detail="Invalid board ID format")
+    if not ObjectId.is_valid(user_id) or not ObjectId.is_valid(task_id):
+        raise HTTPException(status_code=400, detail="Invalid ID format")
 
-    filter_query = {"board_id": ObjectId(board_id)} if board_id else {}
-    tasks = await db.tasks.find(filter_query).to_list(length=100)
+    task = await get_users_tasks(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
 
-    stats = {
-        "total": len(tasks),
-        "not_started": sum(1 for task in tasks if task["status"] == "Not Started"),
-        "working_on_it": sum(1 for task in tasks if task["status"] == "Working on It"),
-        "done": sum(1 for task in tasks if task["status"] == "Done"),
-    }
-    return stats
-
+    await db.tasks.update_one(
+        {"_id": ObjectId(task_id)},
+        {"$pull": {"assigned_to": ObjectId(user_id)}}
+    )
+    return {"message": "Task unassigned successfully"}
 
 # 📌 **Delete a task**
 @router.delete("/{task_id}", response_model=dict)

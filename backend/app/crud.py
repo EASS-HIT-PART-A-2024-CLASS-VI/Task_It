@@ -116,7 +116,7 @@ async def delete_task(task_id: str):
         {"$pull": {"tasks": ObjectId(task_id)}}
     )
     await db.users.update_one(
-        {"_id": ObjectId(task["owner_id"])},
+        {"_id": ObjectId(task["created_by"])},
         {"$pull": {"tasks": ObjectId(task_id)}}
     )
 
