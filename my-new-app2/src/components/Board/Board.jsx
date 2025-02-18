@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ViewKanbanIcon from "@mui/icons-material/ViewKanban";
+import EditIcon from '@mui/icons-material/Edit';
 import GridViewIcon from "@mui/icons-material/GridView";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import BoardDashboard from "./BoardDashboard/BoardDashboard";
@@ -25,6 +26,7 @@ import Schedule from "./Schedule/Schedule";
 const Board = () => {
     const { boardId } = useParams();
     const [boardName, setBoardName] = useState("Loading...");
+    const [isEditing, setIsEditing] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [boardUsers, setBoardUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
@@ -33,6 +35,7 @@ const Board = () => {
     const token = localStorage.getItem("token");
     const decodedToken = JSON.parse(localStorage.getItem("user") || "{}");
     const [refreshKey, setRefreshKey] = useState(0);
+
     // 📌 Fetch Board Details (Including Name)
     useEffect(() => {
         fetch(`http://localhost:8000/api/groups/${boardId}`, {
@@ -146,8 +149,36 @@ const Board = () => {
         }
     };
 
+    const handleboardNameChange =  (e) => {
+        setBoardName(e.target.value);
+    };
 
-    
+    // 📌 Save the New Board Name (Update Backend)
+    const handleBoardRename = async () => {
+        if (!boardName.trim()) {
+            setIsEditing(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8000/api/groups/${boardId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ name: boardName })
+            });
+
+            if (!response.ok) throw new Error("Failed to rename board");
+
+            setIsEditing(false); // ✅ Exit edit mode
+        } catch (error) {
+            console.error("Error renaming board:", error);
+            alert("Could not rename board.");
+        }
+    };
+
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
             {/* 📌 Sidebar */}
@@ -166,8 +197,27 @@ const Board = () => {
                 {/* 📌 Board Name & Avatar */}
                 <div className="board-header">
                     <div className="board-title-container">
-                        <Typography variant="h5" className="board-title">{boardName}</Typography>
+                        {/* Edit Button */}
+                        <button onClick={() => setIsEditing(true)} className="edit-button">
+                            <ListItemIcon><EditIcon /></ListItemIcon>
+                        </button>
+
+                        {/* Editable Board Name */}
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                value={boardName}
+                                onChange={handleboardNameChange}
+                                onBlur={handleBoardRename} // Save on blur
+                                onKeyDown={(e) => e.key === "Enter" && handleBoardRename()} // Save on Enter
+                                className="board-title-input"
+                                autoFocus
+                            />
+                        ) : (
+                            <Typography variant="h5" className="board-title">{boardName}</Typography>
+                        )}
                     </div>
+                    {/* User Avatar */}
                     <div className="avatar-container">
                         <img 
                             src={`http://localhost:8000${decodedToken.photo}`} 

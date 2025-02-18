@@ -38,8 +38,6 @@ class UserCreate(BaseModel):
         }
     }
 
-
-
 class UserResponse(UserBase):
     id: str
     groups: List[str] = []
@@ -63,6 +61,11 @@ class GroupResponse(GroupBase):
 
     class Config:
         json_encoders = {ObjectId: str}
+
+class GroupUpdate(BaseModel):
+    name: str
+    members: Optional[List[str]] = None
+    tasks: Optional[List[str]] = None
 
 # ✅ Task Schemas
 class TaskBase(BaseModel):

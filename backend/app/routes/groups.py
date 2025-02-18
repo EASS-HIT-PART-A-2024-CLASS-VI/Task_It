@@ -5,6 +5,7 @@ from app.routes.users import get_current_user
 from app.db import db  # MongoDB connection
 import logging
 from typing import Dict,List
+from app.schemas import GroupUpdate
 
 router = APIRouter()
 
@@ -229,3 +230,15 @@ async def delete_group(group_id: str):
     await db.groups.delete_one({"_id": ObjectId(group_id)})
     return {"message": f"Group {group['name']} deleted successfully"}
 
+@router.patch("/{group_id}")
+async def update_group_name(group_id: str, group: GroupUpdate):
+    """Update group name."""
+    existing_group = await db.groups.find_one({"_id": ObjectId(group_id)})
+    if not existing_group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    await db.groups.update_one(
+        {"_id": ObjectId(group_id)},
+        {"$set": {"name": group.name}}
+    )
+    return {"message": f"Group {group_id} updated successfully"}

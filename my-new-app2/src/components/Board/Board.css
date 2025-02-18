@@ -1,8 +1,8 @@
-/* 📌 Board Header */
+/* 📌 Board Header Layout */
 .board-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Board name left, avatar right */
+    justify-content: space-between; /* Title left, Avatar right */
     width: 100%;
     padding: 10px 15px;
 }
@@ -13,7 +13,36 @@
     font-weight: bold;
     color: #0e0d0d;
     margin: 0;
-    line-height: 50px; /* Ensures it aligns with the avatar */
+    line-height: 50px;
+    cursor: pointer;
+}
+
+/* 📌 Edit Button */
+.edit-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    transition: opacity 0.2s ease;
+}
+
+.edit-button:hover {
+    opacity: 0.7;
+}
+
+/* 📌 Input Field for Editing */
+.board-title-input {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    padding: 5px;
 }
 
 /* 📌 Avatar Container */
