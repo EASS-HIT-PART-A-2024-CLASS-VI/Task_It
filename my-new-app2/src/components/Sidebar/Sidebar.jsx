@@ -122,7 +122,20 @@ function Sidebar() {
                     onChange={(e) => setNewBoardName(e.target.value)}
                     placeholder="Enter new board name"
                 />
-                <button type="submit">Create Board</button>
+                <button type="submit" className="create-board-button">
+                    Create Board
+                </button>
+                {/* Log out button */}
+                <button
+                    type="button"
+                    className="logout-button"
+                    onClick={() => {
+                        localStorage.clear();
+                        window.location.reload();
+                    }}
+                >
+                    Log Out
+                </button>
             </form>
         </div>
     );

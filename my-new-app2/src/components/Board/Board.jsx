@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Routes, Route, Link } from "react-router-dom";
+import { useParams, Routes, Route, Link, useNavigate } from "react-router-dom";
 import {
     Box,
     Typography,
@@ -29,7 +29,7 @@ const Board = () => {
     const [boardUsers, setBoardUsers] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [showUserList, setShowUserList] = useState(false);
-
+    const navigate = useNavigate();
     const token = localStorage.getItem("token");
 
     // 📌 Fetch Board Details (Including Name)
@@ -186,7 +186,9 @@ const Board = () => {
 
                 {/* 📌 Add User Button */}
                 <Button variant="contained" onClick={() => setShowUserList(true)}>➕ Add Users</Button>
-
+                 {/* 📌 Return To Home */} /
+                <Button variant="contained" onClick={() => navigate("/dashboard")}>🏠 Home</Button>  
+                
                 {/* 📌 User Selection Modal */}
                 <Modal open={showUserList} onClose={() => setShowUserList(false)}>
                     <Card sx={{ padding: 2, maxWidth: 400, margin: "auto", marginTop: "10%" }}>
