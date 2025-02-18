@@ -61,15 +61,16 @@ const Kanban = () => {
 
     // ✅ Listen for task refresh event from `localStorage`
     useEffect(() => {
-        const handleStorageEvent = (event) => {
+        const handleStorageChange = (event) => {
             if (event.key === "refreshTasks") {
-                fetchTasks(); // ✅ Refetch tasks when triggered
+                console.log("📌 Detected task refresh event. Reloading tasks...");
+                fetchTasks(); // Call the existing function to reload tasks
             }
         };
-
-        window.addEventListener("storage", handleStorageEvent);
-        return () => window.removeEventListener("storage", handleStorageEvent);
-    }, []);
+    
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);    
 
     // Function to get priority color
     const getPriorityColor = (priority) => {

@@ -30,7 +30,7 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
                 assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : [], // Ensure array
             });
         }
-    }, [task],[task?.assigned_to]);
+    }, [task]);
     
     useEffect(() => {
         fetch(`http://localhost:8000/api/groups/${boardId}/users`, {
@@ -71,10 +71,13 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
                 assigned_to: updatedTask.assigned_to,
                 deadline: formattedDeadline,  // ✅ Correct format
             };
-    
             console.log("📌 Sending Task Update:", updatePayload);
-    
+
             await onUpdate(updatePayload);
+
+            // ✅ Notify Kanban to refresh immediately
+            localStorage.setItem("refreshTasks", Date.now().toString());
+
         } catch (error) {
             setError(error.message);
         } finally {

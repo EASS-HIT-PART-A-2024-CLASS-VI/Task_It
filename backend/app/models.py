@@ -16,11 +16,14 @@ class PyObjectId(ObjectId):
 
 class User(BaseModel):
     id: Optional[PyObjectId] = None
+    first_name: str
+    last_name: str
     username: str
     email: EmailStr
     hashed_password: str
     groups: List[PyObjectId] = []  # Store references as ObjectId
     tasks: List[PyObjectId] = []
+    photo: Optional[str] = None
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -31,6 +34,7 @@ class Group(BaseModel):
     created_by: PyObjectId  # Reference to User ID
     members: List[PyObjectId] = []  # Store user references
     tasks: List[PyObjectId] = []
+    
 
     class Config:
         json_encoders = {ObjectId: str}

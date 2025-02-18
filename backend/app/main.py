@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from fastapi.staticfiles import StaticFiles
 
 # Import routers
 from app.routes.users import router as user_router
@@ -26,6 +27,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(group_router, prefix="/api/groups", tags=["Groups"])
 app.include_router(task_router, prefix="/api/tasks", tags=["Tasks"])

@@ -19,8 +19,26 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    username: str
+    first_name: str
+    last_name: str
+    email: EmailStr
     password: str
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "username": "testuser",
+                "first_name": "Test",
+                "last_name": "User",
+                "email": "test@example.com",
+                "password": "123456"
+            }
+        }
+    }
+
+
 
 class UserResponse(UserBase):
     id: str

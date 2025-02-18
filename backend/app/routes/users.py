@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Form, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
@@ -8,6 +8,13 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app.db import db  # MongoDB connection
 from bson import ObjectId
+from fastapi import UploadFile, File
+import os
+import shutil
+
+# Create an uploads folder
+UPLOAD_FOLDER = "uploads/user_photos"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Create a router instance
 router = APIRouter()
@@ -21,10 +28,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Token expiry time
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ### 📌 **Schemas**
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
 
 class LoginRequest(BaseModel):
     email: EmailStr
@@ -67,6 +70,7 @@ ALGORITHM = "HS256"
 # Enable logging
 logging.basicConfig(level=logging.INFO)
 
+### 📌 **Dependency Injection**
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     """Extracts the current user from the JWT token."""
     try:
@@ -96,20 +100,55 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError as e:
         logging.error(f"❌ JWT Error: {e}")
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-
+     
 ### 📌 **Signup Endpoint**
-@router.post("/signup", response_model=Token)
-async def signup(user: UserCreate):
-    existing_user = await db.users.find_one({"email": user.email})
+@router.post("/signup")
+async def signup(
+    username: str = Form(...),
+    first_name: str = Form(...),
+    last_name: str = Form(...),
+    email: EmailStr = Form(...),
+    password: str = Form(...),
+    photo: Optional[UploadFile] = File(None)  # ✅ Handle optional file upload
+):
+    """Signup user and handle image upload."""
+
+    existing_user = await db.users.find_one({"email": email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
-    
-    hashed_password = hash_password(user.password)
-    new_user = await db.users.insert_one({"username": user.username, "email": user.email, "hashed_password": hashed_password})
 
-    # Generate JWT Token
-    access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    hashed_password = hash_password(password)
+
+    # ✅ Handle Image Upload
+    photo_url = None
+    if photo:
+        file_ext = os.path.splitext(photo.filename)[1].lower()
+        if file_ext not in [".jpg", ".jpeg", ".png"]:
+            raise HTTPException(status_code=400, detail="Only JPG, JPEG, PNG allowed")
+        
+        filename = f"{username}_{photo.filename}"
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(photo.file, buffer)
+        
+        photo_url = f"/static/profile_pics/{filename}"  # URL to serve the image
+
+    # ✅ Create user document
+    new_user = {
+        "username": username,
+        "first_name": first_name,
+        "last_name": last_name,
+        "email": email,
+        "hashed_password": hashed_password,
+        "photo": photo_url,  # Store the uploaded image URL
+        "groups": [],
+        "tasks": []
+    }
+
+    await db.users.insert_one(new_user)
+    access_token = create_access_token(data={"sub": email})
+
+    return {"access_token": access_token, "token_type": "bearer", "photo_url": photo_url}
 
 ### 📌 **Login Endpoint**
 @router.post("/login", response_model=Token)
