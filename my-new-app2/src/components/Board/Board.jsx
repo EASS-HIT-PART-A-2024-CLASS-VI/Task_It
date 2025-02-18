@@ -31,6 +31,7 @@ const Board = () => {
     const [showUserList, setShowUserList] = useState(false);
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
+    const decodedToken = JSON.parse(localStorage.getItem("user") || "{}");
     const [refreshKey, setRefreshKey] = useState(0);
     // 📌 Fetch Board Details (Including Name)
     useEffect(() => {
@@ -150,10 +151,32 @@ const Board = () => {
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
             {/* 📌 Sidebar */}
-            <Drawer variant="permanent" sx={{ width: 240, flexShrink: 0, [`& .MuiDrawer-paper`]: { width: 240, boxSizing: "border-box" } }}>
-                <Typography variant="h6" sx={{ textAlign: "center", marginY: 2 }}>
-                    {boardName}
-                </Typography>
+            <Drawer 
+                variant="permanent" 
+                sx={{ 
+                    width: 300, 
+                    flexShrink: 0, 
+                    [`& .MuiDrawer-paper`]: { 
+                        width: 290, 
+                        boxSizing: "border-box", 
+                        padding: 2 
+                    } 
+                }}
+            >
+                {/* 📌 Board Name & Avatar */}
+                <div className="board-header">
+                    <div className="board-title-container">
+                        <Typography variant="h5" className="board-title">{boardName}</Typography>
+                    </div>
+                    <div className="avatar-container">
+                        <img 
+                            src={`http://localhost:8000${decodedToken.photo}`} 
+                            alt="User Avatar" 
+                            className="avatar"
+                        />
+                    </div>
+                </div>
+                {/* 📌 Navigation Links */}
                 <List>
                     <ListItem button component={Link} to={`/board/${boardId}/dashboard`}>
                         <ListItemIcon><DashboardIcon /></ListItemIcon>
@@ -174,7 +197,7 @@ const Board = () => {
                 </List>
 
                 {/* 📌 User List */}
-                <Typography variant="h6" sx={{ textAlign: "center", marginY: 2 }}>Users</Typography>
+                <Typography variant="h6" sx={{ marginY: 2 }}>Users</Typography>
                 <List>
                     {boardUsers.map(user => (
                         <ListItem key={user._id}>
@@ -185,10 +208,10 @@ const Board = () => {
                 </List>
 
                 {/* 📌 Add User Button */}
-                <Button variant="contained" onClick={() => setShowUserList(true)}>➕ Add Users</Button>
-                 {/* 📌 Return To Home */} /
+                <Button variant="contained" sx={{ marginY: 1 }} onClick={() => setShowUserList(true)}>➕ Add Users</Button>
+                {/* 📌 Return To Home */}
                 <Button variant="contained" onClick={() => navigate("/dashboard")}>🏠 Home</Button>  
-                
+
                 {/* 📌 User Selection Modal */}
                 <Modal open={showUserList} onClose={() => setShowUserList(false)}>
                     <Card sx={{ padding: 2, maxWidth: 400, margin: "auto", marginTop: "10%" }}>
@@ -196,7 +219,7 @@ const Board = () => {
                             <Typography variant="h6">Select Users to Add</Typography>
                             <List>
                                 {allUsers
-                                    .filter(user => !boardUsers.some(boardUser => boardUser.id === user.id)) // Hide added users
+                                    .filter(user => !boardUsers.some(boardUser => boardUser.id === user.id))
                                     .map(user => (
                                         <ListItem key={user.id} button onClick={() => handleAddUser(user.id)}>
                                             <ListItemText primary={`${user.username} (${user.email})`} />
@@ -204,8 +227,6 @@ const Board = () => {
                                     ))
                                 }
                             </List>
-
-
                         </CardContent>
                     </Card>
                 </Modal>
@@ -223,5 +244,6 @@ const Board = () => {
         </Box>
     );
 };
+
 
 export default Board;
