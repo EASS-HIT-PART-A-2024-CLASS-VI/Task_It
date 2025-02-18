@@ -14,11 +14,45 @@
     gap: 20px;
 }
 
+/* Avatar styling */
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
 
-h2 {
+/* Ensure Avatar stays properly positioned */
+.avatar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    margin: 0;
+}
+
+h2.avatar-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Sidebar header container */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align items to the left */
+    gap: 120px; /* Space between Planner and Avatar */
+    width: 100%;
+}
+
+.sidebar-header h2 {
     font-size: 20px;
     font-weight: bold;
-    color: #030303; /* White for better visibility */
+    color: #0e0d0d; /* White for better visibility */
     margin-bottom: 15px;
 }
 

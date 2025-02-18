@@ -93,15 +93,18 @@ function Sidebar() {
     
     return (
         <div className="sidebar">
+        {/* Header: Planner + Avatar */}
+        <div className="sidebar-header">
             <h2>Planner</h2>
-            {/* <div className="user-profile">
-            <Avatar
-                img={`http://localhost:8000${decodedToken.photo}`}
-                alt="User Avatar"
-                rounded
-                bordered
-                size="md" // You can adjust the size (xs, sm, md, lg, xl)
-            /> */}
+            <div className="avatar-container">
+                <img 
+                    src={`http://localhost:8000${decodedToken.photo}`} 
+                    alt="User Avatar" 
+                    className="avatar"
+                />
+            </div>
+        </div>
+
             <div className="menu">
                 <NavLink to="/dashboard" className="menu-item">
                     🏠 Dashboard
