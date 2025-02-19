@@ -1,0 +1,26 @@
+.priority-high {
+    background: red;
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.priority-medium {
+    background: orange;
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.priority-low {
+    background: green;
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+}

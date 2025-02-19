@@ -13,27 +13,27 @@ const GridView = () => {
     useEffect(() => {
         const fetchTasks = async () => {
             const token = localStorage.getItem("token");
-            if (!boardId || !token) return;
-    
+            if (!boardId || !token) return; // ✅ Ensure token exists
+
             try {
                 const response = await fetch(`http://localhost:8000/api/tasks/?board_id=${boardId}`, {
-                    headers: {
+                    headers: { 
                         "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json"
                     },
                 });
+                console.log("📌 Tasks in GridView:", response); // Debugging log
                 if (!response.ok) throw new Error("Failed to fetch tasks");
-    
+
                 let data = await response.json();
-    
+
                 // ✅ Format deadlines & add row number
                 data = data.map((task, index) => ({
                     ...task,
-                    number: index + 1,
+                    number: index + 1, // ✅ Row numbering
                     deadline: task.deadline ? dayjs(task.deadline).format("DD-MM-YYYY") : "No Deadline",
                 }));
-    
-                // ✅ Ensure tasks only update when users are available
+
                 setTasks(data);
             } catch (error) {
                 console.error("Error fetching tasks:", error);
@@ -41,12 +41,9 @@ const GridView = () => {
                 setLoading(false);
             }
         };
-    
-        if (Object.keys(users).length > 0) {
-            fetchTasks(); // ✅ Fetch tasks only after users are loaded
-        }
-    }, [boardId, users]); // ✅ Fetch tasks after users are updated
-    
+
+        fetchTasks();
+    }, [boardId]);
 
     // ✅ Fetch User Names from API
     useEffect(() => {
@@ -74,16 +71,6 @@ const GridView = () => {
         fetchUsers();
     }, []);
 
-    // ✅ Define Priority Colors
-    const getPriorityColor = (priority) => {
-        switch (priority?.toLowerCase()) {
-            case "high": return "#ffebee"; // Light Red
-            case "medium": return "#fff3e0"; // Light Orange
-            case "low": return "#e8f5e9"; // Light Green
-            default: return "#ffffff"; // White
-        }
-    };
-
     const columns = [
         { field: "number", headerName: "#", width: 90 },
         { field: "title", headerName: "Task Name", width: 200 },
@@ -91,20 +78,16 @@ const GridView = () => {
         { field: "status", headerName: "Status", width: 150 },
         { field: "priority", headerName: "Priority", width: 120 },
         {
-            field: "assigned_to",
-            headerName: "Assigned To",
-            width: 200,
-            valueGetter: (params) => {
-                if (!params.row || !Array.isArray(params.row.assigned_to) || params.row.assigned_to.length === 0) {
-                    return "Unassigned"; // ✅ Handle missing or empty field
-                }
-        
-                return params.row.assigned_to
-                    .map(userId => users[userId] || "Loading...") // ✅ Show "Loading..." until users are fetched
-                    .join(", ");
+                field: "assigned_to",
+                headerName: "Assigned To",
+                width: 200,
+                valueGetter: (params) => {
+                    if (!params.row || !params.row.assigned_to) return "Unassigned"; // ✅ Handle missing field
+            
+                    const assignedUsers = params.row.assigned_to || [];
+                    return assignedUsers.map(userId => users[userId] || "Unknown").join(", ");
+                },
             },
-        },
-        
             
         { field: "deadline", headerName: "Deadline", width: 150 },
     ];

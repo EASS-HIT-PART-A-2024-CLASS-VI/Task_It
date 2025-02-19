@@ -5,7 +5,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import Board from "./components/Board/Board";
-
+import UserTaskGrid from "./components/Dashboard/UserTaskGrid/UserTaskGrid";  // ✅ Import UserTaskGrid component
 function App() {
     const [boards, setBoards] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -104,6 +104,7 @@ const AppContent = ({ isAuthenticated, loading, boards, onLogin, onLogout }) => 
                     isAuthenticated ? (
                         <>
                             <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/tasks" element={<UserTaskGrid />} />  {/* ✅ Add this route */}
                             <Route path="/board/:boardId/*" element={<Board boards={boards} />} />
                             <Route path="*" element={<Navigate to="/dashboard" />} />
                         </>

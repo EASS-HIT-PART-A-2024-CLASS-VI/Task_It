@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException, Query, Depends
 from datetime import datetime
 from bson import ObjectId
@@ -50,6 +51,37 @@ async def get_tasks(board_id: str = Query(None)):
         }
         for task in tasks
     ]
+
+# 📌 **Retrive all user tasks
+@router.get("/user/{user_id}", response_model=List[dict])
+async def get_users_tasks(user_id: str):
+    logging.info(f"📌 Fetching tasks for User ID: {user_id}")
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    tasks = await db.tasks.find({"assigned_to": user_id}).to_list(length=100)
+
+    # Fetch board names
+    board_ids = {task["board_id"] for task in tasks}  # Get unique board IDs
+    boards = await db.groups.find({"_id": {"$in": list(board_ids)}}).to_list(length=len(board_ids))
+    board_map = {str(board["_id"]): board["name"] for board in boards}  # Map {board_id: board_name}
+
+    return [
+        {
+            "id": str(task["_id"]),
+            "title": task["title"],
+            "description": task.get("description", ""),
+            "status": task["status"],
+            "priority": task["priority"],
+            "board_Name": board_map.get(str(task["board_id"]), "Unknown Board"),  # ✅ Get board name
+            "deadline": task.get("deadline", None),
+            "assigned_to": [str(user) for user in task.get("assigned_to", [])],
+            "created_by": str(task["created_by"]),
+        }
+        for task in tasks
+    ]
+
 
 # 📌 **Create a new task**
 @router.post("/", response_model=dict)

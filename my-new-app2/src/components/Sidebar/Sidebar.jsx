@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
-import { Avatar } from 'flowbite-react';
+
 
 function Sidebar() {
     const [boards, setBoards] = useState([]);
@@ -22,7 +22,6 @@ function Sidebar() {
                 }
         
                 console.log("🛠️ JWT Token from LocalStorage:", token); // ✅ Debugging
-        
                 const response = await fetch("http://localhost:8000/api/groups/", {
                     method: "GET",
                     headers: { 
