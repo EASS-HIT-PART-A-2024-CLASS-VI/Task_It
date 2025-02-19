@@ -6,6 +6,8 @@ import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import Board from "./components/Board/Board";
 import UserTaskGrid from "./components/Dashboard/UserTaskGrid/UserTaskGrid";  // ✅ Import UserTaskGrid component
+import UserCalendar from "./components/Dashboard/UserCalendar/UserCalendar";  // ✅ Import UserCalendar component
+
 function App() {
     const [boards, setBoards] = useState([]);
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -105,6 +107,7 @@ const AppContent = ({ isAuthenticated, loading, boards, onLogin, onLogout }) => 
                         <>
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/tasks" element={<UserTaskGrid />} />  {/* ✅ Add this route */}
+                            <Route path="/schedule" element={<UserCalendar/>} />
                             <Route path="/board/:boardId/*" element={<Board boards={boards} />} />
                             <Route path="*" element={<Navigate to="/dashboard" />} />
                         </>

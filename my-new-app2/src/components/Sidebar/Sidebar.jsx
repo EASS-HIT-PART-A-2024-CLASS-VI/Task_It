@@ -148,6 +148,9 @@ function Sidebar() {
                 <NavLink to="/tasks" className="menu-item">
                     ✅ Tasks
                 </NavLink>
+                <NavLink to="/Schedule" className="menu-item">
+                    📅 Schedule
+                </NavLink>
             </div>
             <h3>Your Boards</h3>
             <List>

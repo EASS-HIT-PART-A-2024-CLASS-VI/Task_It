@@ -10,32 +10,6 @@ const Schedule = () => {
     const [users, setUsers] = useState({});
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const token = localStorage.getItem("token");
-            if (!token) return; // Ensure user is authenticated
-
-            try {
-                const response = await fetch("http://localhost:8000/api/users/", {
-                    headers: { "Authorization": `Bearer ${token}` },
-                });
-
-                if (!response.ok) throw new Error("Failed to fetch users");
-
-                const data = await response.json();
-                const userMap = {};
-                data.forEach(user => {
-                    userMap[user.id] = user.name; // ✅ Store ID → Name
-                });
-
-                setUsers(userMap);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        };
-
-        fetchUsers();
-    }, []);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -50,6 +24,7 @@ const Schedule = () => {
                 if (!response.ok) throw new Error("Failed to fetch tasks");
 
                 const tasks = await response.json();
+                console.log("✅ Tasks fetched:", tasks);
 
                 // ✅ Convert tasks into FullCalendar event objects
                 const formattedEvents = tasks
@@ -63,9 +38,7 @@ const Schedule = () => {
                         extendedProps: {
                             description: task.description || "No description",
                             priority: task.priority,
-                            assigned_to: task.assigned_to.length > 0 
-                                ? task.assigned_to.map(userId => users[userId] || "Unknown").join(", ") 
-                                : "Unassigned",
+                            assigned_to: task.assigned_to.length > 0 ? task.assigned_to : "Unassigned",
                             deadline: dayjs(task.deadline).format("DD-MM-YYYY"),
                         },
                     }));
