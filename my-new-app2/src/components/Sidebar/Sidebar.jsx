@@ -1,11 +1,15 @@
 ﻿import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, ListItemSecondaryAction } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import "./Sidebar.css";
 
 
 function Sidebar() {
     const [boards, setBoards] = useState([]);
     const [newBoardName, setNewBoardName] = useState("");
+    const [selectedBoard, setSelectedBoard] = useState(null);
+    const [openDialog, setOpenDialog] = useState(false);
     const userId = localStorage.getItem("userId");
     const decodedToken = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -88,7 +92,41 @@ function Sidebar() {
             alert(error.message || "An error occurred while creating the board.");
         }
     };
-    
+       // ✅ Open Delete Confirmation Dialog
+       const handleOpenDeleteDialog = (board) => {
+        setSelectedBoard(board);
+        setOpenDialog(true);
+    };
+
+    // ✅ Close Dialog
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setSelectedBoard(null);
+    };
+
+    // ✅ Handle Board Deletion
+    const handleDeleteBoard = async () => {
+        if (!selectedBoard) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:8000/api/groups/${selectedBoard.id}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to delete board");
+            }
+
+            // ✅ Remove board from UI
+            setBoards((prevBoards) => prevBoards.filter((b) => b.id !== selectedBoard.id));
+            handleCloseDialog();
+        } catch (error) {
+            console.error("Error deleting board:", error);
+            alert("Could not delete the board.");
+        }
+    };
     
     return (
         <div className="sidebar">
@@ -103,7 +141,6 @@ function Sidebar() {
                 />
             </div>
         </div>
-
             <div className="menu">
                 <NavLink to="/dashboard" className="menu-item">
                     🏠 Dashboard
@@ -111,24 +148,38 @@ function Sidebar() {
                 <NavLink to="/tasks" className="menu-item">
                     ✅ Tasks
                 </NavLink>
-                <NavLink to="/programs" className="menu-item">
-                    📅 Programs
-                </NavLink>
             </div>
             <h3>Your Boards</h3>
-            <ul className="group-list">
+            <List>
                 {boards.length > 0 ? (
                     boards.map((board) => (
-                        <li key={board.id}>
-                            <NavLink to={`/board/${board.id}`} className="menu-item">
-                                {board.name}
-                            </NavLink>
-                        </li>
+                        <ListItem key={board.id} button component={NavLink} to={`/board/${board.id}`} className="menu-item">
+                            <ListItemText primary={board.name} />
+                            <ListItemSecondaryAction>
+                                <IconButton edge="end" aria-label="delete" onClick={() => handleOpenDeleteDialog(board)}>
+                                    <DeleteIcon color="error" />
+                                </IconButton>
+                            </ListItemSecondaryAction>
+                        </ListItem>
                     ))
                 ) : (
                     <p>No boards found. Create one!</p>
                 )}
-            </ul>
+            </List>
+            <div>
+            {/* ✅ Confirmation Dialog */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Delete Board</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to delete the board <strong>{selectedBoard?.name}</strong>?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">Cancel</Button>
+                    <Button onClick={handleDeleteBoard} color="error" variant="contained">Delete</Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+
             <form className="create-board" onSubmit={handleCreateBoard}>
                 <input
                     type="text"

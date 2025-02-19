@@ -115,37 +115,37 @@ const Dashboard = () => {
                                                 {boardStats[board.id] ? (
                                                     <Box sx={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
                                                         <Bar
-    data={{
-        labels: ["Not Started", "Working on It", "Done"],
-        datasets: [
-            {
-                label: "Task Status",
-                data: [
-                    boardStats[board.id]["Not Started"],
-                    boardStats[board.id]["Working on It"],
-                    boardStats[board.id]["Done"],
-                ],
-                backgroundColor: ["#ff6384", "#ffcd56", "#36a2eb"],
-            },
-        ],
-    }}
-    options={{
-        responsive: true,
-        maintainAspectRatio: false, // ✅ Prevents chart stretching
-        plugins: {
-            legend: { display: false },
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0, // ✅ Removes decimal points
-                    callback: (value) => Math.round(value), // ✅ Ensures integer values
-                },
-            },
-        },
-    }}
-/>
+                                                            data={{
+                                                                labels: ["Not Started", "Working on It", "Done"],
+                                                                datasets: [
+                                                                    {
+                                                                        label: "Task Status",
+                                                                        data: [
+                                                                            boardStats[board.id]["Not Started"],
+                                                                            boardStats[board.id]["Working on It"],
+                                                                            boardStats[board.id]["Done"],
+                                                                        ],
+                                                                        backgroundColor: ["#ff6384", "#ffcd56", "#36a2eb"],
+                                                                    },
+                                                                ],
+                                                            }}
+                                                            options={{
+                                                                responsive: true,
+                                                                maintainAspectRatio: false, // ✅ Prevents chart stretching
+                                                                plugins: {
+                                                                    legend: { display: false },
+                                                                },
+                                                                scales: {
+                                                                    y: {
+                                                                        beginAtZero: true,
+                                                                        ticks: {
+                                                                            precision: 0, // ✅ Removes decimal points
+                                                                            callback: (value) => Math.round(value), // ✅ Ensures integer values
+                                                                        },
+                                                                    },
+                                                                },
+                                                            }}
+                                                        />
                                                     </Box>
                                                 ) : (
                                                     <Typography textAlign="center" sx={{ color: "#666" }}>
