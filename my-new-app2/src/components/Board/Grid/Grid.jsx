@@ -7,7 +7,6 @@ import dayjs from "dayjs"; // ✅ Used for date formatting
 const GridView = () => {
     const { boardId } = useParams(); // ✅ Get boardId from URL
     const [tasks, setTasks] = useState([]);
-    const [users, setUsers] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -22,6 +21,7 @@ const GridView = () => {
                         "Content-Type": "application/json"
                     },
                 });
+
                 console.log("📌 Tasks in GridView:", response); // Debugging log
                 if (!response.ok) throw new Error("Failed to fetch tasks");
 
@@ -33,7 +33,7 @@ const GridView = () => {
                     number: index + 1, // ✅ Row numbering
                     deadline: task.deadline ? dayjs(task.deadline).format("DD-MM-YYYY") : "No Deadline",
                 }));
-
+                console.log("📦 Fetched tasks:", data); // Debugging log
                 setTasks(data);
             } catch (error) {
                 console.error("Error fetching tasks:", error);
@@ -45,32 +45,6 @@ const GridView = () => {
         fetchTasks();
     }, [boardId]);
 
-    // ✅ Fetch User Names from API
-    useEffect(() => {
-        const fetchUsers = async () => {
-            const token = localStorage.getItem("token");
-            try {
-                const response = await fetch("http://localhost:8000/api/users/", {
-                    headers: { "Authorization": `Bearer ${token}` },
-                });
-
-                if (!response.ok) throw new Error("Failed to fetch users");
-
-                const data = await response.json();
-                const userMap = {};
-                data.forEach(user => {
-                    userMap[user.id] = user.name; // ✅ Store ID → Name
-                });
-
-                setUsers(userMap);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-            }
-        };
-
-        fetchUsers();
-    }, []);
-
     const columns = [
         { field: "number", headerName: "#", width: 90 },
         { field: "title", headerName: "Task Name", width: 200 },
@@ -78,18 +52,13 @@ const GridView = () => {
         { field: "status", headerName: "Status", width: 150 },
         { field: "priority", headerName: "Priority", width: 120 },
         {
-                field: "assigned_to",
-                headerName: "Assigned To",
-                width: 200,
-                valueGetter: (params) => {
-                    if (!params.row || !params.row.assigned_to) return "Unassigned"; // ✅ Handle missing field
-            
-                    const assignedUsers = params.row.assigned_to || [];
-                    return assignedUsers.map(userId => users[userId] || "Unknown").join(", ");
-                },
-            },
-            
-        { field: "deadline", headerName: "Deadline", width: 150 },
+            field: "assigned_to",
+            headerName: "Assigned To",
+            width: 200,
+            renderCell: (params) => params.row.assigned_to.join(", "),
+        },
+        
+        { field: "deadline", headerName: "Deadline", width: 200 },
     ];
 
     return (

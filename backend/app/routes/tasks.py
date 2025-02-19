@@ -37,8 +37,30 @@ async def get_tasks(board_id: str = Query(None)):
     filter_query = {"board_id": ObjectId(board_id)} if board_id else {}
     tasks = await db.tasks.find(filter_query).to_list(length=100)
 
-    return [
-        {
+    # ✅ Fetch all unique user IDs from assigned_to field
+    user_ids = set()
+    for task in tasks:
+        for user_id in task.get("assigned_to", []):
+            if ObjectId.is_valid(user_id):
+                user_ids.add(ObjectId(user_id))
+
+    logging.info(f"📌 Extracted User IDs: {user_ids}")  # ✅ Debug user IDs
+
+    # ✅ Fetch user details for mapping
+    users = await db.users.find({"_id": {"$in": list(user_ids)}}).to_list(length=len(user_ids))
+    user_map = {str(user["_id"]): user["username"] for user in users}  # ✅ Ensure keys are strings
+
+    logging.info(f"📌 User Map: {user_map}")  # ✅ Debug user mapping
+
+    response = []
+    for task in tasks:
+        assigned_users = []
+        for user_id in task.get("assigned_to", []):
+            assigned_users.append(user_map.get(str(user_id), "Unknown User"))  # ✅ Ensure string lookup
+
+        logging.info(f"📌 Task {task['_id']} Assigned To: {assigned_users}")  # ✅ Log assigned users
+
+        response.append({
             "id": str(task["_id"]),
             "title": task["title"],
             "description": task.get("description", ""),
@@ -46,11 +68,11 @@ async def get_tasks(board_id: str = Query(None)):
             "priority": task["priority"],
             "board_id": str(task["board_id"]),
             "deadline": task.get("deadline", None),
-            "assigned_to": [str(user_id) for user_id in task.get("assigned_to", [])],
+            "assigned_to": assigned_users,  # ✅ Should now show usernames
             "created_by": str(task["created_by"]),
-        }
-        for task in tasks
-    ]
+        })
+
+    return response
 
 # 📌 **Retrive all user tasks
 @router.get("/user/{user_id}", response_model=List[dict])
@@ -81,7 +103,6 @@ async def get_users_tasks(user_id: str):
         }
         for task in tasks
     ]
-
 
 # 📌 **Create a new task**
 @router.post("/", response_model=dict)
@@ -161,7 +182,6 @@ async def update_task(task_id: str, task_update: dict):
     print(f"📌 Updated Task in DB: {updated_task}")
 
     return {"message": "Task updated successfully"}
-
 
 # 📌 **Assign a task to a user**
 @router.patch("/{task_id}/assign", response_model=dict)
