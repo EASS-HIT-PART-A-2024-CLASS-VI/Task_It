@@ -70,12 +70,13 @@ const TasksGrid = () => {
         <Paper
             sx={{
                 height: "85vh",
-                width: "90%",
+                width: "93%",
                 margin: "auto",
                 padding: 2,
                 display: "flex",
                 justifyContent: "center",
-                alignItems: "center"
+                alignItems: "center",
+                marginRight:"-13%"
             }}
         >
             <DataGrid

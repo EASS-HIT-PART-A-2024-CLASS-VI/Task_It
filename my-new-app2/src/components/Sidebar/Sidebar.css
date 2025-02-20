@@ -43,6 +43,7 @@ h2.avatar-container {
 /* Sidebar header container */
 .sidebar-header {
     display: flex;
+    color: #FFEFD3;
     align-items: center;
     justify-content: flex-start; /* Align items to the left */
     gap: 120px; /* Space between Planner and Avatar */

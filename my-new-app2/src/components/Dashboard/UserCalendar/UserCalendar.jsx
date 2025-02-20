@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import { Card, CardContent, Typography, Box, Divider } from "@mui/material";
+import {  Typography, Box, Divider } from "@mui/material";
 import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 
@@ -90,11 +90,11 @@ const UserSchedule = () => {
             width: "100%", 
             height: "90vh", 
             padding: "20px", 
-            backgroundColor: "white", 
             display: "flex", 
             flexDirection: "column", 
-            alignItems: "center"
-        }}>
+            alignItems: "center",
+            justifyContent: "center",
+            }}>
             {/* 📌 Title with Icon */}
             <Typography 
                 variant="h4" 
@@ -104,14 +104,15 @@ const UserSchedule = () => {
                     marginBottom: "1rem", 
                     display: "flex", 
                     alignItems: "center", 
-                    gap: "10px" 
+                    gap: "10px", 
+                    marginRight: "-20%" // ✅ Adjusted margin
                 }}
             >
                 📅 User Task Schedule
             </Typography>
     
             {/* 📌 Full Width Divider */}
-            <Divider sx={{ width: "90%", bgcolor: "#000", marginBottom: "1rem" }} />
+            <Divider sx={{ width: "90%", bgcolor: "#000", marginBottom: "1rem",marginRight:"-20%"}} />
     
             {/* 📌 Loading State */}
             {loading ? (
@@ -125,7 +126,8 @@ const UserSchedule = () => {
                         padding: "10px", 
                         boxShadow: "0px 2px 10px rgba(0,0,0,0.2)", 
                         borderRadius: "10px",
-                        backgroundColor: "#f9f9f9" // ✅ Light background for better contrast
+                        backgroundColor: "#f9f9f9", // ✅ Light background for better contrast
+                        marginRight: "-20%" // ✅ Adjusted margin
                     }}
                 >
                     <FullCalendar
@@ -147,6 +149,8 @@ const UserSchedule = () => {
                                         fontSize: "11px",  // ✅ Smaller font
                                         textAlign: "left",
                                         width: "100%",
+                                        marginRight: "-20%" // ✅ Adjusted margin
+
                                     }}
                                 >
                                     <Typography variant="subtitle2" sx={{ fontWeight: "bold", color: "#000" }}>

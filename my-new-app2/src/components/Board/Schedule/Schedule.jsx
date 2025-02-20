@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import {  Typography, Box, Divider } from "@mui/material";
 import { useParams } from "react-router-dom"; // ✅ Get boardId from URL
 import dayjs from "dayjs"; // ✅ Import for date formatting
 
@@ -9,7 +10,6 @@ const Schedule = () => {
     const [events, setEvents] = useState([]);
     const [users, setUsers] = useState({});
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -77,22 +77,28 @@ const Schedule = () => {
                     height="90vh"
                     eventContent={(eventInfo) => {
                         const assignedUsers = Array.isArray(eventInfo.event.extendedProps.assigned_to)
-                            ? eventInfo.event.extendedProps.assigned_to.join(", ")
+                            ? eventInfo.event.extendedProps.assigned_to.join(" | ")
                             : "Unassigned";  // ✅ Join usernames into a string
                     
                         return (
-                            <div style={{
-                                padding: "5px",
-                                backgroundColor: eventInfo.event.backgroundColor,
-                                borderRadius: "5px",
-                                fontSize: "12px",
-                                color: "#000",  // ✅ Set text to black
-                                textAlign: "left"
-                            }}>
-                                <strong>{eventInfo.event.title}</strong> <br />
+                            <Box
+                                    sx={{
+                                        padding: "6px",  // ✅ Slightly smaller padding
+                                        backgroundColor: eventInfo.event.backgroundColor || "#e0e0e0",
+                                        borderRadius: "6px",  // ✅ Slightly smaller rounded corners
+                                        boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
+                                        color: "#000",
+                                        fontSize: "11px",  // ✅ Smaller font
+                                        textAlign: "left",
+                                        width: "100%",
+                                        marginRight: "-20%" // ✅ Adjusted margin
+
+                                    }}
+                                >
+                                <strong>🎯{eventInfo.event.title}</strong> <br />
                                 <span>📅 {eventInfo.event.extendedProps.deadline}</span> <br />
                                 <span>👤 {assignedUsers}</span>  {/* ✅ Display usernames correctly */}
-                            </div>
+                            </Box>
                         );
                     }}
                     
