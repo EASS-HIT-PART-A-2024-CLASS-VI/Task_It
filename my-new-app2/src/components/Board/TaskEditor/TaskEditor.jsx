@@ -27,7 +27,7 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
             setUpdatedTask({
                 ...task,
                 deadline: task.deadline ? task.deadline : "", // Avoid unnecessary parsing
-                assigned_to: Array.isArray(task.assigned_to) ? task.assigned_to : [], // Ensure array
+                assigned_to_ids: Array.isArray(task.assigned_to_ids) ? task.assigned_to_ids : [], // Ensure array
             });
         }
     }, [task]);
@@ -37,9 +37,12 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` }
         })
+        
         .then(response => response.json())
         .then(data => setBoardUsers(Array.isArray(data) ? data : []))
         .catch(error => console.error("❌ Error fetching board users:", error));
+        console.log("📌 Fetching Board Users...");  // Debugging log
+        console.log("📌 Board Users:", boardUsers);  // Debugging log
     }, [boardId, token]);
 
 
@@ -68,7 +71,7 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
                 description: updatedTask.description,
                 status: updatedTask.status,
                 priority: updatedTask.priority,
-                assigned_to: updatedTask.assigned_to,
+                assigned_to: updatedTask.assigned_to_ids,
                 deadline: formattedDeadline,  // ✅ Correct format
             };
             console.log("📌 Sending Task Update:", updatePayload);
@@ -171,10 +174,10 @@ const TaskEditor = ({ task, onClose, onUpdate, token }) => {
                 <Select
                     multiple
                     name="assigned_to"
-                    value={updatedTask.assigned_to || []}  // ✅ Ensure it's always an array
+                    value={updatedTask.assigned_to_ids || []}  // ✅ Ensure it's always an array
                     onChange={(e) => {
                         const selectedUsers = Array.isArray(e.target.value) ? e.target.value : [e.target.value];
-                        setUpdatedTask({ ...updatedTask, assigned_to: selectedUsers });
+                        setUpdatedTask({ ...updatedTask, assigned_to_ids: selectedUsers });
                     }}
                     renderValue={(selected) =>
                         selected.map(userId => {

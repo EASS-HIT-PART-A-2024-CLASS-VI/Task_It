@@ -75,20 +75,27 @@ const Schedule = () => {
                     initialView="dayGridMonth" 
                     events={events} 
                     height="90vh"
-                    eventContent={(eventInfo) => (
-                        <div style={{
-                            padding: "5px",
-                            backgroundColor: eventInfo.event.backgroundColor,
-                            borderRadius: "5px",
-                            fontSize: "12px",
-                            color: "#000",  // ✅ Set text to black
-                            textAlign: "left"
-                        }}>
-                            <strong>{eventInfo.event.title}</strong> <br />
-                            <span>📅 {eventInfo.event.extendedProps.deadline}</span> <br />
-                            <span>👤 {eventInfo.event.extendedProps.assigned_to}</span>
-                        </div>
-                    )}
+                    eventContent={(eventInfo) => {
+                        const assignedUsers = Array.isArray(eventInfo.event.extendedProps.assigned_to)
+                            ? eventInfo.event.extendedProps.assigned_to.join(", ")
+                            : "Unassigned";  // ✅ Join usernames into a string
+                    
+                        return (
+                            <div style={{
+                                padding: "5px",
+                                backgroundColor: eventInfo.event.backgroundColor,
+                                borderRadius: "5px",
+                                fontSize: "12px",
+                                color: "#000",  // ✅ Set text to black
+                                textAlign: "left"
+                            }}>
+                                <strong>{eventInfo.event.title}</strong> <br />
+                                <span>📅 {eventInfo.event.extendedProps.deadline}</span> <br />
+                                <span>👤 {assignedUsers}</span>  {/* ✅ Display usernames correctly */}
+                            </div>
+                        );
+                    }}
+                    
                     eventClick={(info) => {
                         alert(`Task: ${info.event.title}\nPriority: ${info.event.extendedProps.priority}\nDeadline: ${info.event.extendedProps.deadline}\n\nAssigned To: ${info.event.extendedProps.assigned_to}\n\nDescription: ${info.event.extendedProps.description}`);
                     }}

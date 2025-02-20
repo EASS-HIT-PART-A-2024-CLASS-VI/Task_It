@@ -69,6 +69,7 @@ async def get_tasks(board_id: str = Query(None)):
             "board_id": str(task["board_id"]),
             "deadline": task.get("deadline", None),
             "assigned_to": assigned_users,  # ✅ Should now show usernames
+            "assigned_to_ids": [str(user_id) for user_id in task.get("assigned_to", [])],  # ✅ Show IDs as well
             "created_by": str(task["created_by"]),
         })
 
