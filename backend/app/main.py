@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.routes.users import router as user_router
 from app.routes.groups import router as group_router
 from app.routes.tasks import router as task_router
+from app.routes.chatbot import router as chatbot_router
 
 
 # Ensure the 'static' directory exists
@@ -24,7 +25,7 @@ app = FastAPI(title="Task Management API", version="1.0")
 # Enable CORS for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,6 +36,7 @@ app.mount("/static/profile_pics", StaticFiles(directory="static/profile_pics"), 
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(group_router, prefix="/api/groups", tags=["Groups"])
 app.include_router(task_router, prefix="/api/tasks", tags=["Tasks"])
+app.include_router(chatbot_router, prefix="/api", tags=["Chatbot"])
 
 @app.get("/")
 async def root():

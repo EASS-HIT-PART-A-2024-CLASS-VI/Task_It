@@ -194,6 +194,14 @@ const Board = () => {
                     } 
                 }}
             >
+                {/* User Avatar */}
+                <div className="avatar-container ">
+                    <img 
+                        src={`http://localhost:8000${decodedToken.photo}`} 
+                        alt="User Avatar" 
+                        className="avatar"
+                    />
+                </div>
                 {/* 📌 Board Name & Avatar */}
                 <div className="board-header">
                     <div className="board-title-container">
@@ -216,14 +224,6 @@ const Board = () => {
                         ) : (
                             <Typography variant="h5" className="board-title">{boardName}</Typography>
                         )}
-                    </div>
-                    {/* User Avatar */}
-                    <div className="avatar-container">
-                        <img 
-                            src={`http://localhost:8000${decodedToken.photo}`} 
-                            alt="User Avatar" 
-                            className="avatar"
-                        />
                     </div>
                 </div>
                 {/* 📌 Navigation Links */}

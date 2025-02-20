@@ -181,31 +181,33 @@ function Sidebar() {
                     <Button onClick={handleDeleteBoard} color="error" variant="contained">Delete</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+            </div>
+                {/* Create Board Form */}
+                <form className="create-board" onSubmit={handleCreateBoard}>
+                    <input
+                        type="text"
+                        value={newBoardName}
+                        onChange={(e) => setNewBoardName(e.target.value)}
+                        placeholder="Enter new board name"
+                        className="input-field"
+                    />
+                    <button type="submit" className="logout-button">
+                        Create Board
+                    </button>
+                    {/* Log out button */}
+                    <button
+                        type="button"
+                        className="logout-button"
+                        onClick={() => {
+                            localStorage.clear();
+                            window.location.reload();
+                        }}
+                    >
+                        Log Out
+                    </button>
+                </form>
+                </div>
 
-            <form className="create-board" onSubmit={handleCreateBoard}>
-                <input
-                    type="text"
-                    value={newBoardName}
-                    onChange={(e) => setNewBoardName(e.target.value)}
-                    placeholder="Enter new board name"
-                />
-                <button type="submit" className="create-board-button">
-                    Create Board
-                </button>
-                {/* Log out button */}
-                <button
-                    type="button"
-                    className="logout-button"
-                    onClick={() => {
-                        localStorage.clear();
-                        window.location.reload();
-                    }}
-                >
-                    Log Out
-                </button>
-            </form>
-        </div>
     );
 }
 
