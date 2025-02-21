@@ -208,7 +208,6 @@ const Kanban = () => {
         }
     };
 
-
     return (
         <Box sx={{ width: "100%", height: "90vh", padding: "20px", display: "flex", 
             flexDirection:"column",alignItems:"center",justifyContent:"center",
