@@ -65,16 +65,44 @@ const Schedule = () => {
     };
 
     return (
-        <div style={{ width: "80vh", height: "100vh", padding: "20px", backgroundColor: "white" }}>
-            <h2 style={{ color: "#000" }}>Task Schedule</h2> {/* ✅ Title in Black */}
+        <Box sx={{ width: "100%", height: "90vh", padding: "20px", display: "flex", 
+        flexDirection:"column",alignItems:"center",justifyContent:"center",
+        marginRight:"-20%" }}>
+            {/* 📌 Title with Icon */}
+            <Typography
+                variant="h4"
+                sx={{
+                    color:"#000",
+                    textAlign:"center",
+                    marginBottom:"1rem",
+                    display:"flex",
+                    alignItems:"center",
+                    gap: "10px",
+                    marginRight:"0%"
+
+                }}
+            >
+                📅 User Task Schedule
+            </Typography>
+            <Divider sx={{ width: "90%", bgcolor:"#000", marginBottom:"1rem",marginRight:"0%" }} />
+            {/* 📅 Calendar Component */}
             {loading ? (
-                <p style={{ color: "#000" }}>Loading tasks...</p>
+                <Typography sx={{ color: "#000", textAlign: "center" }}>Loading tasks...</Typography>
             ) : (
+            <Box sx={{ width: "90%", maxWidth: "900px", 
+                height:"auto",
+                padding:"10px",
+                boxShadow:"0px 2px 10px rgba(0,0,0,0.2)",
+                borderRadius:"10px",
+                backgroundColor:"#f9f9f9", // ✅ Light gray background
+                marginRight:"0%" // ✅ Adjusted margin
+             }}>
                 <FullCalendar 
                     plugins={[dayGridPlugin]} 
                     initialView="dayGridMonth" 
                     events={events} 
-                    height="90vh"
+                    height="75vh"
+                    contentHeight="auto"
                     eventContent={(eventInfo) => {
                         const assignedUsers = Array.isArray(eventInfo.event.extendedProps.assigned_to)
                             ? eventInfo.event.extendedProps.assigned_to.join(" | ")
@@ -82,22 +110,27 @@ const Schedule = () => {
                     
                         return (
                             <Box
-                                    sx={{
-                                        padding: "6px",  // ✅ Slightly smaller padding
-                                        backgroundColor: eventInfo.event.backgroundColor || "#e0e0e0",
-                                        borderRadius: "6px",  // ✅ Slightly smaller rounded corners
-                                        boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
-                                        color: "#000",
-                                        fontSize: "11px",  // ✅ Smaller font
-                                        textAlign: "left",
-                                        width: "100%",
-                                        marginRight: "-20%" // ✅ Adjusted margin
-
-                                    }}
-                                >
-                                <strong>🎯{eventInfo.event.title}</strong> <br />
-                                <span>📅 {eventInfo.event.extendedProps.deadline}</span> <br />
-                                <span>👤 {assignedUsers}</span>  {/* ✅ Display usernames correctly */}
+                                sx={{
+                                    padding: "6px",  // ✅ Slightly smaller padding
+                                    backgroundColor: eventInfo.event.backgroundColor || "#e0e0e0",
+                                    borderRadius: "6px",  // ✅ Slightly smaller rounded corners
+                                    boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
+                                    color: "#000",
+                                    fontSize: "11px",  // ✅ Smaller font
+                                    textAlign: "left",
+                                    width: "100%",
+                                    marginRight: "-20%" // ✅ Adjusted margin
+                                }}
+                            >
+                                <Typography variant="subtitle2" component="div">
+                                    🎯{eventInfo.event.title}
+                                </Typography>
+                                <Typography variant="body2" component="div">
+                                    📅 {eventInfo.event.extendedProps.deadline}
+                                </Typography>
+                                <Typography variant="body2" component="div">
+                                    👤 {assignedUsers}
+                                </Typography>
                             </Box>
                         );
                     }}
@@ -106,8 +139,9 @@ const Schedule = () => {
                         alert(`Task: ${info.event.title}\nPriority: ${info.event.extendedProps.priority}\nDeadline: ${info.event.extendedProps.deadline}\n\nAssigned To: ${info.event.extendedProps.assigned_to}\n\nDescription: ${info.event.extendedProps.description}`);
                     }}
                 />
+            </Box>
             )}
-        </div>
+        </Box>
     );
 };
 

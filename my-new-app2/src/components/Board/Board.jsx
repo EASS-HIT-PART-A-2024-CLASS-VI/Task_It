@@ -22,6 +22,7 @@ import BoardDashboard from "./BoardDashboard/BoardDashboard";
 import Kanban from "./Kanban/Kanban";
 import GridComponent from "./Grid/Grid";
 import Schedule from "./Schedule/Schedule";
+import { TextInput } from 'flowbite-react'
 
 const Board = () => {
     const { boardId } = useParams();
@@ -194,19 +195,12 @@ const Board = () => {
                     } 
                 }}
             >
-                {/* User Avatar */}
-                <div className="avatar-container ">
-                    <img 
-                        src={`http://localhost:8000${decodedToken.photo}`} 
-                        alt="User Avatar" 
-                        className="avatar"
-                    />
-                </div>
+  
                 {/* 📌 Board Name & Avatar */}
-                <div className="board-header">
-                    <div className="board-title-container">
+                <div className="board-header" style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div className="board-title-container" style={{ display: "flex", justifyContent: "space-between", gap: "20px", justifyItems: "center", alignItems: "center" }}>
                         {/* Edit Button */}
-                        <button onClick={() => setIsEditing(true)} className="edit-button">
+                        <button onClick={() => setIsEditing(true)} className="edit-button" style={{width: "20px", height: "20px", borderRadius: "50%", border: "none", backgroundColor: "transparent"}}>
                             <ListItemIcon><EditIcon /></ListItemIcon>
                         </button>
 
@@ -221,9 +215,18 @@ const Board = () => {
                                 className="board-title-input"
                                 autoFocus
                             />
+                            // <TextInput />
                         ) : (
                             <Typography variant="h5" className="board-title">{boardName}</Typography>
                         )}
+                    </div>
+                    {/* User Avatar */}
+                    <div className="avatar-container ">
+                        <img 
+                            src={`http://localhost:8000${decodedToken.photo}`} 
+                            alt="User Avatar" 
+                            className="avatar"
+                        />
                     </div>
                 </div>
                 {/* 📌 Navigation Links */}
