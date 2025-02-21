@@ -138,7 +138,7 @@ const Dashboard = () => {
                             whileTap={{ scale: 0.98 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <Card sx={{ width: 350, padding: 2, bgcolor: "#fff", boxShadow: 5, minHeight: 250 }}>
+                            <Card sx={{ width: 350, padding: 2, bgcolor: "#fff", boxShadow: 5, minHeight: 250,borderRadius: 6 }}>
                                 <CardContent>
                                     <Typography
                                         variant="h6"
@@ -195,8 +195,7 @@ const Dashboard = () => {
                 No boards registered.
             </Typography>
         )}
-    </Box>
-    
+    </Box>  
 </Box>
     
     );

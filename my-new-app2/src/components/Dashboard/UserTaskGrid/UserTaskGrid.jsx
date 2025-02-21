@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Paper } from "@mui/material";
+import { Box, Paper,Typography } from "@mui/material";
 import dayjs from "dayjs";
 
 const TasksGrid = () => {
@@ -67,18 +67,26 @@ const TasksGrid = () => {
     ];
 
     return (
-        <Paper
+        <Box
             sx={{
-                height: "85vh",
-                width: "93%",
+                height: "80vh",
+                width: "90%",
                 margin: "auto",
-                padding: 2,
+                padding: 3,
+                backgroundColor: "white",
+                borderRadius: 6,
                 display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginRight:"-13%"
+                flexDirection: "column",
+                marginRight:"-10%"
             }}
         >
+            <Typography variant="h4"sx={{
+                marginBottom:"1rem",
+                display:"flex",
+                alignItems:"center",
+                justifyContent:"center"
+            }}>📑 User Task Grid </Typography>
+        
             <DataGrid
                 rows={tasks}
                 columns={columns}
@@ -97,7 +105,7 @@ const TasksGrid = () => {
                     "& .priority-low": { backgroundColor: "#e8f5e9" }, // Light Green
                 }}
             />
-        </Paper>
+        </Box>
     );
 };
 
