@@ -85,12 +85,24 @@ async def get_board_dashboard(group_id: str = Path(...)):
         "low": sum(1 for task in tasks if task["priority"] == "Low"),
     }
 
-    # ✅ Tasks Assigned to Users
+    # ✅ Tasks Assigned to Users with Task Details
     user_task_counts = {}
     for task in tasks:
         for user_id in task.get("assigned_to", []):
-            user_task_counts[user_id] = user_task_counts.get(user_id, {"high": 0, "medium": 0, "low": 0})
+            if user_id not in user_task_counts:
+                user_task_counts[user_id] = {
+                    "tasks": [],
+                    "high": 0,
+                    "medium": 0,
+                    "low": 0
+                }
             user_task_counts[user_id][task["priority"].lower()] += 1
+            user_task_counts[user_id]["tasks"].append({
+                "task_id": str(task["_id"]),
+                "title": task["title"],
+                "status": task["status"],
+                "priority": task["priority"]
+            })
 
     # ✅ Fetch Usernames for Assigned Tasks
     user_ids = list(user_task_counts.keys())
@@ -100,6 +112,7 @@ async def get_board_dashboard(group_id: str = Path(...)):
     assigned_tasks = [
         {
             "name": user["username"],
+            "tasks": user_task_counts.get(str(user["_id"]), {}).get("tasks", []),
             "high": user_task_counts.get(str(user["_id"]), {}).get("high", 0),
             "medium": user_task_counts.get(str(user["_id"]), {}).get("medium", 0),
             "low": user_task_counts.get(str(user["_id"]), {}).get("low", 0),
@@ -130,10 +143,10 @@ async def get_board_dashboard(group_id: str = Path(...)):
         "total": len(tasks),
         "status_counts": status_counts,
         "priority_counts": priority_counts,
-        "assigned_tasks": assigned_tasks,
+        "assigned_tasks":list(assigned_tasks),
         "priority_breakdown": priority_breakdown,
     }
-   
+
 # 📌 **Add User to Group**
 @router.patch("/{group_id}/add_user/{user_id}")
 async def add_user(group_id: str, user_id: str):

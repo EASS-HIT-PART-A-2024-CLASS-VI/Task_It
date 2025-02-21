@@ -6,8 +6,9 @@ import { useParams } from "react-router-dom";
 
 const BoardDashboard = () => {
     const { boardId } = useParams();
-    const [stats, setStats] = useState({ total: 0, status_counts: {}, priority_counts: {} });
+    const [stats, setStats] = useState({ total: 0, status_counts: {}, priority_counts: {}, assigned_tasks: {} });
     const token = localStorage.getItem("token");
+    const assignedTasks = Array.isArray(stats.assigned_tasks) ? stats.assigned_tasks : [];
 
     useEffect(() => {
         const fetchBoardData = async () => {
@@ -29,8 +30,8 @@ const BoardDashboard = () => {
 
     return (
         <Box sx={{ padding: 2, backgroundColor: "transparent", minHeight: "100vh" }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: "center", color: "black" }}>
-                Dashboard
+            <Typography variant="h4" gutterBottom sx={{ textAlign: "center", color: "black" }}>
+            📊 Dashboard
             </Typography>
             <Grid2 container spacing={10} >
                 <Grid2 item size={6}>
@@ -78,16 +79,19 @@ const BoardDashboard = () => {
                 </Grid2>
                 <Grid2 item size={4}>
                     <Paper elevation={3} sx={{ padding: 2, borderRadius: 6 }}>
-                        <Typography textAlign="center">Assigned Tasks by Priority</Typography>
+                        <Typography textAlign="center">Assigned Tasks by Users</Typography>
+                        
                         <Pie data={{
-                            labels: Object.keys(stats.priority_counts),
-                            datasets: [{
-                                data: Object.values(stats.priority_counts),
-                                backgroundColor: ["#FF6384", "#FFCE56", "#36A2EB"],
-                            }]
-                        }} />
+    labels: assignedTasks.map(user => user.name), 
+    datasets: [{
+        data: assignedTasks.map(user => user.tasks.length),
+        backgroundColor: ["#FF6384", "#FFCE56", "#36A2EB"],
+    }]
+}} />
+
                     </Paper>
                 </Grid2>
+
             </Grid2>
         </Box>
     );
