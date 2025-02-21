@@ -6,6 +6,7 @@ from app.db import db  # MongoDB connection
 import logging
 from typing import Dict,List
 from app.schemas import GroupUpdate
+from app.routes import tasks
 
 router = APIRouter()
 
@@ -53,7 +54,7 @@ async def get_group(group_id: str):
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    return {"id": str(group["_id"]), "name": group["name"], "members": [str(m) for m in group["members"]]}
+    return {"id": str(group["_id"]), "name": group["name"],"created_by":str(group["created_by"]), "members": [str(m) for m in group["members"]]}
 
 # 📌 **Retrieve Board Dashboard Data**
 @router.get("/{group_id}/dashboard", response_model=Dict)
@@ -234,12 +235,17 @@ async def remove_user_from_group_api(group_id: str, user_id: str):
 
 # 📌 **Delete Group**
 @router.delete("/{group_id}")
-async def delete_group(group_id: str):
+async def delete_group(group_id: str,user: dict = Depends(get_current_user)):
     """Deletes a group."""
     group = await db.groups.find_one({"_id": ObjectId(group_id)})
+    logging.info(f"📌 Deleting group {group_id} by user: {user} and group {group}")  # ✅ Debugging
+
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-
+    
+    if user["id"] != str(group["created_by"]):
+        raise HTTPException(status_code=403, detail="You are not the creator of this group")
+        
     await db.groups.delete_one({"_id": ObjectId(group_id)})
     return {"message": f"Group {group['name']} deleted successfully"}
 

@@ -51,7 +51,7 @@ function Login({ onLogin }) {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h2>Welcome to Your Planner</h2>
+                <h2>Welcome to Task It</h2>
                 <p>Please log in to access your account</p>
                 <form onSubmit={handleLogin}>
                     <div className="input-group">

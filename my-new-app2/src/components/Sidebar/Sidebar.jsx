@@ -107,13 +107,18 @@ function Sidebar() {
     // ✅ Handle Board Deletion
     const handleDeleteBoard = async () => {
         if (!selectedBoard) return;
-
+        console.log("🗑️ Deleting board:", selectedBoard);
         try {
             const token = localStorage.getItem("token");
             const response = await fetch(`http://localhost:8000/api/groups/${selectedBoard.id}`, {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+                payload: token.userId
             });
+
+            if(!response.status === 403) {
+                alert("You are not authorized to delete this board");
+            }
 
             if (!response.ok) {
                 throw new Error("Failed to delete board");
