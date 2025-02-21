@@ -36,7 +36,7 @@ const Board = () => {
     const token = localStorage.getItem("token");
     const decodedToken = JSON.parse(localStorage.getItem("user") || "{}");
     const [refreshKey, setRefreshKey] = useState(0);
-
+    const [boardOwner, setBoardOwner] = useState("");
     // 📌 Fetch Board Details (Including Name)
     useEffect(() => {
         fetch(`http://localhost:8000/api/groups/${boardId}`, {
@@ -47,6 +47,8 @@ const Board = () => {
             .then(data => {
                 console.log("📌 Board Details:", data);
                 setBoardName(data.name || "Untitled Board");
+                setBoardOwner(data["created_by"]);
+
             })
             .catch(error => {
                 console.error("❌ Error fetching board details:", error);
@@ -64,12 +66,17 @@ const Board = () => {
             .then(data => {
                 console.log("📌 Board Users:", data);
                 setBoardUsers(Array.isArray(data) ? data : []);
+                
             })
             .catch(error => {
                 console.error("❌ Error fetching board users:", error);
                 setBoardUsers([]);
+                
             });
     }, [boardId, token]);
+
+    console.log("📌 Board Owner:", boardOwner);
+    console.log("📌 UserId", boardUsers); 
 
     // 📌 Fetch All Registered Users
     useEffect(() => {
@@ -252,10 +259,19 @@ const Board = () => {
                 {/* 📌 User List */}
                 <Typography variant="h6" sx={{ marginY: 2 }}>Users</Typography>
                 <List>
+                    
                     {boardUsers.map(user => (
                         <ListItem key={user._id}>
                             <ListItemText primary={user.username} />
-                            <Button color="secondary" onClick={() => handleRemoveUser(user.id)}>Remove</Button>
+                            {user.id === boardOwner ? (
+                                <ListItemIcon>
+                                    <Button  color="warning" sx={{ marginLeft: "-3%" }}>
+                                        👑 
+                                    </Button>
+                                </ListItemIcon>
+                            ) : (
+                                <Button color="secondary" onClick={() => handleRemoveUser(user.id)}>Remove</Button>
+                            )}
                         </ListItem>
                     ))}
                 </List>
