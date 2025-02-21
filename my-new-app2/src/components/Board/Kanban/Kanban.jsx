@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-    Box, Typography, Paper, Grid, IconButton, Modal, TextField, Button
+    Box, Typography, Paper, Grid, IconButton, Modal, TextField, Button, Divider
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -210,9 +210,22 @@ const Kanban = () => {
 
 
     return (
-        <Box sx={{ padding: 3 }}>
-            <Typography variant="h4">Kanban Board</Typography>
+        <Box sx={{ width: "100%", height: "90vh", padding: "20px", display: "flex", 
+            flexDirection:"column",alignItems:"center",justifyContent:"center",
+            marginRight:"-20%" }}>
+            <Typography variant="h4"sx={{
+                    color:"#000",
+                    textAlign:"center",
+                    marginTop:"-8rem",
+                    marginBottom:"1rem",
+                    display:"flex",
+                    alignItems:"center",
+                    gap: "10px",
+                    marginRight:"0%"
 
+                }}>📝 Kanban Board</Typography>
+             <Divider sx={{ width: "90%", bgcolor:"#000", marginBottom:"1rem",marginRight:"0%" }} />
+             {/* 📅 Kanban Component */}
             <Button 
                 variant="contained" 
                 color="primary" 
@@ -298,17 +311,20 @@ const Kanban = () => {
             {loading && <Typography>Loading tasks...</Typography>}
             
             <DragDropContext onDragEnd={handleDragEnd}>
-                <Grid container spacing={2}>
+                <Grid container spacing={10}>
                     {["Not Started", "Working on It", "Done"].map((status) => (
                         <Grid item xs={12} md={4} key={status}>
                             <Paper 
                                 sx={{ 
                                     padding: 2, 
                                     minHeight: "500px",
+                                    width: "280px",
+                                    flexGrow: 1,
+                                    borderRadius: 6,
                                     backgroundColor: "background.default" 
                                 }}
                             >
-                                <Typography variant="h6" sx={{ mb: 2 }}>
+                                <Typography variant="h4" sx={{ mb: 2,textAlign:"center" }}>
                                     {status}
                                 </Typography>
                                 <Droppable droppableId={status}>
