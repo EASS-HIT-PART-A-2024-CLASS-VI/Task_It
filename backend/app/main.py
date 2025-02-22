@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.staticfiles import StaticFiles
 
 # Import routers
@@ -10,6 +11,27 @@ from app.routes.groups import router as group_router
 from app.routes.tasks import router as task_router
 from app.routes.chatbot import router as chatbot_router
 
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# Use a test database if running tests
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+DB_NAME = "test_db" if os.getenv("PYTEST_RUNNING") else "production_db"
+
+# Connect to MongoDB
+client = AsyncIOMotorClient(MONGO_URI)
+db = client[DB_NAME]  # Switches database automatically
+
+# Initialize FastAPI app
+app = FastAPI(title="Task Management API", version="1.0")
+
+# Ensure the database is available in the app
+app.db = db
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
 
 # Ensure the 'static' directory exists
 STATIC_FOLDER = "static/profile_pics"

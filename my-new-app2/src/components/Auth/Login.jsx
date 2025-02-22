@@ -49,6 +49,8 @@ function Login({ onLogin }) {
     
 
     return (
+        <div className="login-page">
+        <img src='/Task It.png' alt="Logo"  />
         <div className="login-container">
             <div className="login-card">
                 <h2>Welcome to Task It</h2>
@@ -93,6 +95,7 @@ function Login({ onLogin }) {
                     <a href="/register">Sign up for an account</a>
                 </div>
             </div>
+        </div>
         </div>
     );
 }

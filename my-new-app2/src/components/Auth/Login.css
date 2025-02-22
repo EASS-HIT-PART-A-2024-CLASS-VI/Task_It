@@ -1,9 +1,16 @@
 /* Login.css */
+.login-page{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
 body {
     margin: 0;
     padding: 0;
     font-family: "Arial", sans-serif;
-    background: linear-gradient(135deg, #6c63ff, #a065ff);
+    background: #112661;
     height: 100vh;
     display: flex;
     align-items: center;
@@ -111,7 +118,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(45deg, #6c63ff, #a065ff, #ff63a1, #ffba63);
+    background: #2f4274;
     background-size: 400% 400%;
     animation: gradientBackground 10s ease infinite;
 }

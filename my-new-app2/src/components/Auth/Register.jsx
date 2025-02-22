@@ -8,12 +8,34 @@ function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [photo, setPhoto] = useState(null);
+    const [passwordError, setPasswordError] = useState("");
     const navigate = useNavigate();
 
+    // Password Policy check function
+    const validatePassword = (password) => {
+        const minLength = 8;
+        const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+        
+        if (password.length < minLength) {
+            return "Password must be at least 8 characters.";
+        }
+        if (!regex.test(password)) {
+            return "Password must contain at least one letter and one number.";
+        }
+        return "";
+    };
 
     const handleRegister = async (e) => {
         e.preventDefault();
-    
+
+        const passwordPolicyError = validatePassword(password);
+        if (passwordPolicyError) {
+            setPasswordError(passwordPolicyError);
+            return;
+        }
+
+        setPasswordError(""); // Reset password error if valid
+
         const formData = new FormData();
         formData.append("username", username);
         formData.append("first_name", firstName);
@@ -51,71 +73,76 @@ function Register() {
     
 
     return (
-        <div className="register-container">
-            <div className="register-card">
-                <h2>Register</h2>
-                <form onSubmit={handleRegister}>
-                    <div className="input-group">
-                        <label>Username:</label>
-                        <input
-                            type="text"
-                            placeholder="Enter your username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label>First Name:</label>
-                        <input
-                            type="text"
-                            placeholder="Enter your first name"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label>Last Name:</label>
-                        <input
-                            type="text"
-                            placeholder="Enter your last name"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label>Email:</label>
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label>Password:</label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="input-group">
-                        <label>Profile Photo:</label>
-                        <input
-                            type="file"
-                            accept="image/png, image/jpeg"
-                            onChange={(e) => setPhoto(e.target.files[0])}  // ✅ Handle file upload
-                        />
-                    </div>
-                    <button type="submit" className="register-button">Sign Up</button>
-                </form>
-            </div>
+        <div className="login-page">
+        <img src='/Task It.png' alt="Logo"  />
+        <div className="login-container">
+            
+            <h2  > Register</h2>
+            <form onSubmit={handleRegister}>
+                <div className="input-group">
+                    <label>Username:</label>
+                    <input
+                        type="text"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    <label>First Name:</label>
+                    <input
+                        type="text"
+                        placeholder="Enter your first name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    <label>Last Name:</label>
+                    <input
+                        type="text"
+                        placeholder="Enter your last name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    <label>Email:</label>
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="input-group">
+                    <label>Password:</label>
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+                </div>
+                <div className="input-group">
+                    <label>Profile Photo:</label>
+                    <input
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => setPhoto(e.target.files[0])}  // ✅ Handle file upload
+                    />
+                </div>
+                <button type="submit" className="logout-button" style={{ display: 'block', margin: '0 auto' }}> 
+                    Sign Up
+                </button>
+            </form>
+        </div>
         </div>
     );
 }

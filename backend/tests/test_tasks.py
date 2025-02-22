@@ -1,55 +1,63 @@
+import sys
+import os
+# Add current test directory to path so that test_users and test_groups can be imported
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 from fastapi.testclient import TestClient
 from app.main import app
+from test_users import test_user
+from test_groups import test_group
 
 client = TestClient(app)
-
-def test_read_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Welcome to the Task Manager API"}
-
-def test_create_user():
-    response = client.post(
-        "/users",
-        json={"username": "testuser", "email": "test@example.com", "password": "password123"},
-    )
-    assert response.status_code == 201
-    assert response.json()["username"] == "testuser"
+test_task = {}
 
 def test_create_task():
+    global test_task
+    assert "id" in test_user, "User must be created first"
+    assert "id" in test_group, "Group must be created first"
+
+    headers = {"Authorization": f"Bearer {test_user['token']}"}
     response = client.post(
-        "/tasks",
-        json={"title": "Test Task", "description": "This is a test task", "status": "Pending", "assigned_to": "testuser"},
+        "/api/tasks",
+        json={
+            "title": "Test Task",
+            "description": "This is a test task",
+            "status": "Pending",
+            "priority": "Medium",
+            "board_id": test_group["id"]
+        },
+        headers=headers
     )
-    assert response.status_code == 201
-    assert response.json()["title"] == "Test Task"
+    assert response.status_code == 201, f"Task creation failed: {response.text}"
+    test_task = response.json()
+
+
+def test_get_tasks():
+    headers = {"Authorization": f"Bearer {test_user['token']}"}
+    response = client.get("/api/tasks", headers=headers)
+    assert response.status_code == 200, f"Get tasks failed: {response.text}"
+    response_data = response.json()
+    assert isinstance(response_data, list), "Expected a list of tasks"
 
 def test_update_task():
+    global test_task
+    assert "id" in test_task, "Task must be created first"
+    headers = {"Authorization": f"Bearer {test_user['token']}"}
     response = client.patch(
-        "/tasks/1",
+        f"/api/tasks/{test_task['id']}",
         json={"status": "Completed"},
+        headers=headers
     )
-    assert response.status_code == 200
-    assert response.json()["status"] == "Completed"
+    assert response.status_code == 200, f"Update task failed: {response.text}"
+    response_data = response.json()
+    assert response_data.get("message") == "Task updated successfully", "Unexpected response message"
 
 def test_delete_task():
-    response = client.delete("/tasks/1")
-    assert response.status_code == 200
-    assert response.json() == {"detail": "Task deleted successfully"}
-
-
-def test_create_group():
-    response = client.post(
-        "/groups",
-        json={"name": "Test Group"},
-    )
-    assert response.status_code == 201
-    assert response.json()["name"] == "Test Group"
-
-def test_assign_user_to_group():
-    response = client.post(
-        "/groups/1/users",
-        json={"user_id": 1},
-    )
-    assert response.status_code == 200
-    assert response.json()["detail"] == "User added to group successfully"
+    global test_task
+    assert "id" in test_task, "Task must be created first"
+    headers = {"Authorization": f"Bearer {test_user['token']}"}
+    response = client.delete(f"/api/tasks/{test_task['id']}", headers=headers)
+    assert response.status_code == 200, f"Delete task failed: {response.text}"
+    response_data = response.json()
+    expected_message = f"Task with ID {test_task['id']} deleted successfully"
+    assert response_data.get("message") == expected_message, "Unexpected response message"
