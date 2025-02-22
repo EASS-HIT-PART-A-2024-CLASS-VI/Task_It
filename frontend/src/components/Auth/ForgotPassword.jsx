@@ -23,12 +23,12 @@ function ForgotPassword() {
         justifyContent: "center",
         alignItems: "center",
         height: "100vh",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "linear-gradient(135deg, #34c2b9cf 0%, #008ba0 100%)",
       }}
     >
       <div
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "linear-gradient(135deg, #34c2b9cf 0%, #008ba0 100%)",
           padding: "20px",
           borderRadius: "8px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
@@ -62,7 +62,7 @@ function ForgotPassword() {
                 padding: "10px",
                 borderRadius: "4px",
                 border: "none",
-                backgroundColor: "#0073e6",
+                backgroundColor: "linear-gradient(135deg, #34c2b9cf 0%, #008ba0 100%)",
                 color: "#fff",
                 fontSize: "16px",
               }}

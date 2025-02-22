@@ -5,7 +5,7 @@
 
 .sidebar {
     width: 250px;
-    background-color: #ceb5b5;
+    background-color: #d8d7d2a7;
     padding: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
@@ -13,7 +13,7 @@
 .dashboard-content {
     flex: 1;
     padding: 20px;
-    background: linear-gradient(to bottom right, #ff9a9e, #fad0c4);
+    background: linear-gradient(135deg, #34c2b9cf 0%, #008ba0 100%);
 }
 
 .widgets {

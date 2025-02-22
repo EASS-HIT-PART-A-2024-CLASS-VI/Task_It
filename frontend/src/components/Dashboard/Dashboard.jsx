@@ -75,7 +75,7 @@ const Dashboard = () => {
                 width: "100vw",  // ✅ Full width of the viewport
                 minHeight: "100vh",
                 padding: 3,
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #34c2b9cf 0%, #008ba0 100%)",
             }}
         >
         {/* 📌 Static Title - Centered with Adjustable Position */}
