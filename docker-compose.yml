@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile  # Path to the Dockerfile inside the frontend directory
     container_name: TaskItFrontend_app
     ports:
-      - "3000:3000"  # Map the frontend's port 80 to localhost:3000
+      - "3000:3000"  # Expose frontend on localhost:3000
     networks:
       - app-network
     depends_on:
@@ -19,17 +19,21 @@ services:
       dockerfile: Dockerfile  # Path to the Dockerfile inside the backend directory
     container_name: fastapi_app
     ports:
-      - "8000:8000"
+      - "${PORT}:${PORT}"  # Use .env variable for port
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy  # Ensures MongoDB is ready before FastAPI starts
     environment:
-      - MONGO_URI=mongodb://mongo:27017
-      - DB_NAME=task_manager
-      - PORT=8000
+      - MONGO_URI=${MONGO_URI}
+      - DB_NAME=${DB_NAME}
+      - PORT=${PORT}
+      - SECRET_KEY=${SECRET_KEY}
     volumes:
       - ./backend:/app
     networks:
       - app-network
+    env_file:
+      - .env  # Load backend environment variables
 
   mongo:
     image: mongo:5.0
@@ -41,6 +45,11 @@ services:
       - mongo_data:/data/db
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
 volumes:
   mongo_data:
@@ -48,5 +57,3 @@ volumes:
 networks:
   app-network:
     driver: bridge
-
- 

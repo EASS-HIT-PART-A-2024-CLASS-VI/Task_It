@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import { Card, CardContent, Typography, Box, Grid, CircularProgress, Divider } from "@mui/material";
 import { motion } from "framer-motion"; 
-import Chatbot from "../Chatbot/Chatbot";
 import { BsRobot } from "react-icons/bs";
 import "./Dashboard.css";
 

@@ -11,6 +11,10 @@ from bson import ObjectId
 from fastapi import UploadFile, File
 import os
 import shutil
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Create an uploads folder
 UPLOAD_FOLDER = "static/profile_pics"
@@ -20,9 +24,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 router = APIRouter()
 
 # JWT Configuration
-SECRET_KEY = "your-secret-key"  # Replace with a strong secret
+SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-key")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # Token expiry time
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 # Password Hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

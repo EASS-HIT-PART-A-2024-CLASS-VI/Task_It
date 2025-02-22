@@ -1,177 +1,141 @@
-# Task Manager for Team Collaboration
+# 🌤 Task It: Task Manager for Team Collaboration
 
-## Overview
-A task management application for small teams to manage tasks, deadlines, and updates in real-time.
+![Task It Logo](./my-new-app2/build/static/images/Task It Logo.png)
+
+<p align="center">
+  <img src="./my-new-app2/build/static/images/Task It Logo.png" width="200" alt="Task It Logo">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-%23009688.svg?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/React-%2361DAFB.svg?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/Docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/MongoDB-%2347A248.svg?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB">
+</p>
+
+## 🌍 Overview
+
+**Task It** is a task management application designed for small teams to collaborate, manage tasks, track deadlines, and view real-time updates. The application is built with a **Dockerized backend** using **FastAPI** and a **React** frontend, making it fully containerized and easy to deploy.
+
+## 🚀 Technologies
+
+- **Backend**: FastAPI for building the RESTful API
+- **Frontend**: React for the dynamic UI
+- **Database**: MongoDB for data persistence
+- **Deployment**: Docker and Docker Compose for containerization
+- **Authentication**: JWT-based token authentication
 
 ---
-# Project Documentation
 
-## 1. High-Level Architecture
+## 📃 Table of Contents
+1. [High-Level Architecture](#🏠-high-level-architecture)
+2. [Backend Documentation](#📚-backend-documentation)
+3. [Frontend Integration](#🌐-frontend-integration)
+4. [Development Workflow](#🛠-development-workflow)
+5. [Deployment Instructions](#💪-deployment-instructions)
+6. [Features](#👨‍💼-features)
+7. [Future Work](#💡-future-work)
+8. [Contributing](#🤝-contributing)
 
-The system consists of three main components:
+---
 
-- **Frontend**: Placeholder for React or Vue.js.
-- **Backend**: FastAPI-based REST API service.
-- **Database**: PostgreSQL for data persistence.
+## 🏠 High-Level Architecture
 
-### Architecture Diagram
+### Components
+- **Frontend**: Developed using React to offer a responsive and interactive user experience.
+- **Backend**: FastAPI provides a fast and scalable REST API that connects the frontend with the MongoDB database.
+- **Database**: MongoDB for managing tasks, users, and groups.
 
-The architecture includes the following interactions:
+### Architecture Flow
+- The frontend communicates with the backend through REST API calls.
+- The backend stores data in MongoDB.
+- The entire stack is containerized using Docker and Docker Compose for seamless deployment.
 
-- The frontend sends HTTP requests to the backend.
-- The backend processes the requests and interacts with the PostgreSQL database.
-- The entire system is containerized using Docker for easy deployment and scalability.
+---
 
-### Key Technologies
-
-- **Backend**: FastAPI
-- **Database**: PostgreSQL
-- **Deployment**: Docker and Docker Compose
-
-## 2. Backend Documentation
+## 📚 Backend Documentation
 
 ### Directory Structure
-
 ```plaintext
 backend/
 ├── app/
-│   ├── main.py          # Entry point for the FastAPI app
+│   ├── main.py          # Entry point for FastAPI app
 │   ├── routes/          # API routes (tasks, users, groups)
 │   │   ├── tasks.py
 │   │   ├── users.py
 │   │   ├── groups.py
 │   └── __init__.py
-│   ├── crud.py          # CRUD operations for the database
-│   ├── db.py            # Database connection and setup
-│   ├── models.py        # SQLAlchemy models
+│   ├── crud.py          # Database operations
+│   ├── db.py            # Database connection
+│   ├── models.py        # MongoDB models
 │   ├── schemas.py       # Pydantic schemas for validation
-├── Dockerfile           # Defines how to build the Docker image
-├── requirements.txt     # Dependencies for the app
-└── tests/               # Test cases for the backend
+├── Dockerfile           # Docker setup for backend
+├── requirements.txt     # Backend dependencies
+└── tests/               # Backend test cases
 ```
-
-### API Endpoints
-
-#### **Tasks**
-
-- `GET /tasks/tasks`: Read tasks.
-- `POST /tasks/tasks`: Create a task.
-- `PATCH /tasks/tasks/{task_id}`: Update task status.
-- `DELETE /tasks/tasks/{task_id}`: Delete a task.
-- `PATCH /tasks/tasks/{task_id}/assign`: Assign a task.
-- `GET /tasks/dashboard`: Get dashboard data.
-- `GET /tasks/filter`: Filter tasks by deadline.
-
-#### **Users**
-
-- `POST /users/users/register`: Register a user.
-- `GET /users/users`: Get all users.
-
-#### **Groups**
-
-- `POST /groups/groups`: Create a group.
-- `PATCH /groups/groups/{group_id}/add_user`: Add user to a group.
-
-### Deployment Process
-
-1. **Run with Docker**:
-
-   - Build and start containers:
-     ```bash
-     docker-compose up --build
-     ```
-   - Access FastAPI at [http://localhost:8000/docs](http://localhost:8000/docs).
-
-2. **Database Migration**:
-
-   - Ensure your database is initialized with the required schema before deployment.
-
-## 3. Frontend Integration
-
-### Planned Steps
-
-Once the frontend is ready, document:
-
-- **Frontend to Backend Integration**:
-  - How the frontend calls the API endpoints.
-  - Expected request/response formats.
-- **Frontend Features**:
-  - State management.
-  - User flows and interaction points.
-
-## 4. Development Workflow
-
-### Version Control
-
-- Use Git for version control.
-- `.gitignore` excludes unnecessary files such as `.vs/`.
-
-### Testing
-
-- Write unit tests for all backend routes.
-- Use `pytest` to execute tests within the Docker container:
-  ```bash
-  docker-compose run backend pytest
-  ```
-
-### Continuous Integration/Continuous Deployment (CI/CD)
-
-- Automate testing and deployment with tools like GitHub Actions or Jenkins.
-
-## 5. Future Work
-
-### Enhancements
-
-- Implement authentication and authorization.
-- Add frontend components for task, user, and group management.
-- Optimize database queries for performance.
-
-### Scalability
-
-- Use Kubernetes for container orchestration.
-- Set up a load balancer for handling high traffic.
 
 ---
 
-This document serves as a starting point for understanding the architecture and backend implementation of the project. Future updates will include frontend integration and deployment workflows.\
+## 🌐 Frontend Integration
+- **Frontend interacts with the backend through REST API endpoints.**
+- **Dashboard**: Display tasks and their statuses interactively.
+- **Task Details**: Ability to view and edit individual tasks.
+- **Create Task**: A form to add new tasks.
 
+---
 
-## Features
+## 🛠 Development Workflow
+### **Version Control**
+- Git for version control.
+- `.gitignore` excludes unnecessary files such as `.vs/`.
 
-### Backend (Ex1)
-- Built with **FastAPI**.
-- REST API endpoints:
-  - Create, Read, Update, and Delete (CRUD) tasks.
-  - Assign tasks to team members.
-  - Update task status (e.g., Pending, In Progress, Completed).
-  - Fetch a dashboard of tasks by status or deadline.
-- **Dockerized backend** using a Dockerfile.
+### **Testing**
+- Unit tests located in `backend/tests`.
+```bash
+docker-compose run backend pytest
+```
 
-### Frontend/UI (Ex2)
-- Built with **React** for a dynamic and interactive UI.
-- Main views:
-  - **Dashboard**: Overview of tasks and statuses.
-  - **Task Details**: View and edit specific tasks.
-  - **Create Task**: A form to add new tasks.
-- Interacts with the backend via REST API calls.
-- Alternatively, you can use **Streamlit** for a simpler, data-driven dashboard built with Python.
+### **CI/CD**
+- Automate testing and deployment using GitHub Actions or Jenkins.
 
-### Integration with Docker Compose (Ex3)
-- Use **Docker Compose** to run the backend (FastAPI) and frontend (React or Streamlit) together seamlessly.
-- `docker-compose.yml` includes:
-  - Definition for the FastAPI service.
-  - Definition for the React/Streamlit service.
-  - Network configuration to allow the frontend to communicate with the backend.
+---
 
-### README (Ex3)
-- Explains:
-  - How to set up Docker and run the app using `docker-compose up`.
-  - List of available REST API endpoints.
-  - Frontend features and instructions to access the UI.
+## 💪 Deployment Instructions
+### Using Docker
+```bash
+docker-compose up --build
+```
 
-### Presentation (Ex3 Part 2)
-- Create a short video (2-3 minutes) demonstrating:
-  - How the app works (UI interaction).
-  - Features like adding, updating, and viewing tasks.
-  - Docker Compose setup and how to start the app.
+### Access API Docs
+- **[http://localhost:8000/docs](http://localhost:8000/docs)**
+
+---
+
+## 👨‍💼 Features
+- **Task Management**: Create, update, assign, and track tasks.
+- **User Groups & Roles**: Assign users to teams.
+- **JWT Authentication**: Secure API access.
+- **MongoDB Storage**: Flexible document-based database.
+- **Fully Dockerized**: Easy deployment with Docker.
+
+---
+
+## 💡 Future Work
+- **Authentication & Authorization**: Implement advanced JWT handling.
+- **Scalability**: Use Kubernetes for container orchestration.
+- **UI Enhancements**: Improve frontend with new designs.
+
+---
+
+## 🤝 Contributing
+**Fork the repository & submit a PR!**
+
+```bash
+git clone https://github.com/EASS-HIT-PART-A-2024-CLASS-VI/Task_It.git
+git checkout -b feature-branch
+git commit -m "Add new feature"
+git push origin feature-branch
+```
+
+---
 
