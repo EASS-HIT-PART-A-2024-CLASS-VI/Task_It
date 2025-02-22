@@ -1,7 +1,5 @@
 # 🌤 Task It: Task Manager for Team Collaboration
 
-![Task It Logo](./my-new-app2/build/static/images/Task It Logo.png)
-
 <p align="center">
   <img src="./my-new-app2/public/Task It.png" width="400" alt="Task It Logo">
 </p>
