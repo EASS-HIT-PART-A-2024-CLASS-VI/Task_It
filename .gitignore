@@ -21,7 +21,7 @@ yarn-debug.log*
 yarn-error.log*
 coverage/
 
-# FastAPI / Python files
+# Python files (for FastAPI or other Python-based projects)
 __pycache__/
 *.pyc
 *.pyo
@@ -35,7 +35,7 @@ __pycache__/
 instance/
 .envrc
 
-# SQLite Database
+# SQLite Database files
 *.db
 *.sqlite3
 *.sqlite
@@ -46,10 +46,7 @@ env/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# VSCode settings
-.vscode/
-
-# IDE-specific files
+# IDE-specific files (VSCode, JetBrains, etc.)
 .idea/
 *.suo
 *.ntvs*
@@ -68,19 +65,18 @@ lerna-debug.log*
 # Dependency directories
 jspm_packages/
 bower_components/
-node_modules/
 pypi/
-venv/
 
-
-# Docker
+# Docker-related files
 docker-compose.override.yml
+docker-compose.prod.yml
 **/docker/data/
 docker/dbdata/
 .dockerignore
+*.tar.gz          # Archive files (e.g., project-structure.tar.gz)
 
-# Production builds
-/site/
+# Production builds (build output)
+.site/
 .next/
 out/
 public/static/
@@ -88,3 +84,11 @@ public/static/
 # MacOS files
 *.swp
 *.swo
+
+# Git metadata (ensure Git tracks only necessary files)
+.git/
+
+# Docker container volume data (if any)
+backend/static/profile_pics/
+backend/tests/.pytest_cache/
+backend/tests/static/profile_pics/

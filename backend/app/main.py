@@ -9,7 +9,6 @@ from fastapi.staticfiles import StaticFiles
 from app.routes.users import router as user_router
 from app.routes.groups import router as group_router
 from app.routes.tasks import router as task_router
-from app.routes.chatbot import router as chatbot_router
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -58,7 +57,6 @@ app.mount("/static/profile_pics", StaticFiles(directory="static/profile_pics"), 
 app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(group_router, prefix="/api/groups", tags=["Groups"])
 app.include_router(task_router, prefix="/api/tasks", tags=["Tasks"])
-app.include_router(chatbot_router, prefix="/api", tags=["Chatbot"])
 
 @app.get("/")
 async def root():

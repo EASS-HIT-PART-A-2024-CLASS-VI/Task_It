@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./my-new-app2  # Path to the frontend directory
+      dockerfile: Dockerfile  # Path to the Dockerfile inside the frontend directory
+    container_name: TaskItFrontend_app
+    ports:
+      - "3000:3000"  # Map the frontend's port 80 to localhost:3000
+    networks:
+      - app-network
+    depends_on:
+      - fastapi  # Ensure the backend starts before the frontend
+
+  fastapi:
+    build:
+      context: ./backend  # Path to the backend directory
+      dockerfile: Dockerfile  # Path to the Dockerfile inside the backend directory
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - DB_NAME=task_manager
+      - PORT=8000
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+volumes:
+  mongo_data:
+
+networks:
+  app-network:
+    driver: bridge
+
+ 
