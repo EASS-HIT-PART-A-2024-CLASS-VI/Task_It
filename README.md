@@ -3,7 +3,7 @@
 ![Task It Logo](./my-new-app2/build/static/images/Task It Logo.png)
 
 <p align="center">
-  <img src="./my-new-app2/build/static/images/Task It Logo.png" width="200" alt="Task It Logo">
+  <img src="./my-new-app2/public/Task It.png" width="200" alt="Task It Logo">
 </p>
 
 <p align="center">
