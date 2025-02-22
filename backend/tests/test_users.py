@@ -58,6 +58,8 @@ async def test_signup(async_client, test_user_fixture):
     test_user_fixture["email"] = email
     test_user_fixture["access_token"] = response.json().get("access_token")
     assert test_user_fixture["access_token"], "Token not received in login response"
+    
+    
 
 # ✅ Ensure Login Test Uses the Created User
 @pytest.mark.asyncio
