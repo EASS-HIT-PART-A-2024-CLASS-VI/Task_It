@@ -24,7 +24,7 @@
 - **Authentication**: JWT-based token authentication
 
 <p align="center">
-  <img src="./my-new-app2/TaskItArcheitecture.png" width="400" alt="Task It Logo">
+  <img src="/TaskItArcheitecture.png" width="400" alt="Task It Arceitecture">
 </p>
 ---
 
