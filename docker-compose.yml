@@ -3,7 +3,7 @@ version: '3.8'
 services:
   frontend:
     build:
-      context: ./my-new-app2  # Path to the frontend directory
+      context: ./frontend  # Path to the frontend directory
       dockerfile: Dockerfile  # Path to the Dockerfile inside the frontend directory
     container_name: TaskItFrontend_app
     ports:

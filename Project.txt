@@ -2,7 +2,7 @@ Project.txt
 README.md
 backend
 docker-compose.yml
-my-new-app2
+frontend
 
 ./backend:
 Dockerfile
@@ -56,7 +56,7 @@ profile_pics
 
 ./backend/tests/static/profile_pics:
 
-./my-new-app2:
+./frontend:
 Dockerfile
 README.md
 build
@@ -67,7 +67,7 @@ package.json
 public
 src
 
-./my-new-app2/build:
+./frontend/build:
 Favicon.png
 Logo_No1.webp
 Task It Logo.png
@@ -81,21 +81,21 @@ manifest.json
 robots.txt
 static
 
-./my-new-app2/build/static:
+./frontend/build/static:
 css
 js
 
-./my-new-app2/build/static/css:
+./frontend/build/static/css:
 main.cf84e658.css
 main.cf84e658.css.map
 
-./my-new-app2/build/static/js:
+./frontend/build/static/js:
 main.33095ea4.js
 main.33095ea4.js.LICENSE.txt
 main.33095ea4.js.map
 
 
-./my-new-app2/public:
+./frontend/public:
 Favicon.png
 Logo_No1.webp
 Task It Logo.png
@@ -107,7 +107,7 @@ logo512.png
 manifest.json
 robots.txt
 
-./my-new-app2/src:
+./frontend/src:
 App.css
 App.js
 App.test.js
@@ -120,19 +120,19 @@ logo.svg
 reportWebVitals.js
 setupTests.js
 
-./my-new-app2/src/components:
+./frontend/src/components:
 Auth
 Board
 Dashboard
 Sidebar
 
-./my-new-app2/src/components/Auth:
+./frontend/src/components/Auth:
 ForgotPassword.jsx
 Login.css
 Login.jsx
 Register.jsx
 
-./my-new-app2/src/components/Board:
+./frontend/src/components/Board:
 Board.css
 Board.jsx
 BoardDashboard
@@ -142,41 +142,41 @@ Kanban
 Schedule
 TaskEditor
 
-./my-new-app2/src/components/Board/BoardDashboard:
+./frontend/src/components/Board/BoardDashboard:
 BoardDashboard.css
 BoardDashboard.jsx
 
-./my-new-app2/src/components/Board/Boardheader:
+./frontend/src/components/Board/Boardheader:
 BoardHeader.jsx
 
-./my-new-app2/src/components/Board/Grid:
+./frontend/src/components/Board/Grid:
 Grid.css
 Grid.jsx
 
-./my-new-app2/src/components/Board/Kanban:
+./frontend/src/components/Board/Kanban:
 Kanban.css
 Kanban.jsx
 
-./my-new-app2/src/components/Board/Schedule:
+./frontend/src/components/Board/Schedule:
 Schedule.css
 Schedule.jsx
 
-./my-new-app2/src/components/Board/TaskEditor:
+./frontend/src/components/Board/TaskEditor:
 TaskEditor.jsx
 
-./my-new-app2/src/components/Dashboard:
+./frontend/src/components/Dashboard:
 Dashboard.css
 Dashboard.jsx
 UserCalendar
 UserTaskGrid
 
-./my-new-app2/src/components/Dashboard/UserCalendar:
+./frontend/src/components/Dashboard/UserCalendar:
 UserCalendar.jsx
 
-./my-new-app2/src/components/Dashboard/UserTaskGrid:
+./frontend/src/components/Dashboard/UserTaskGrid:
 UserTaskGrid.css
 UserTaskGrid.jsx
 
-./my-new-app2/src/components/Sidebar:
+./frontend/src/components/Sidebar:
 Sidebar.css
 Sidebar.jsx

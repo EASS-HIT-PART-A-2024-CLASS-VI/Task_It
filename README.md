@@ -1,7 +1,7 @@
 # 🚀 Task It: Modern Team Collaboration Platform
 
 <p align="center">
-  <img src="./my-new-app2/public/Task It.png" width="400" alt="Task It Logo">
+  <img src="./frontend/public/Task It.png" width="400" alt="Task It Logo">
 </p>
 
 <div align="center">

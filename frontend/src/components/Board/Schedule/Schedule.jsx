@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
+import dayGridPlugin from "@fullcalendar/daygrid/index.js";
 import {  Typography, Box, Divider } from "@mui/material";
 import { useParams } from "react-router-dom"; // ✅ Get boardId from URL
 import dayjs from "dayjs"; // ✅ Import for date formatting

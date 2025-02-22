@@ -1,0 +1,153 @@
+/* Login.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Arial", sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: #2f4274;
+    background-size: 400% 400%;
+    animation: gradientBackground 10s ease infinite;
+}
+
+/* Moves login page closer to the top */
+.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Aligns content to the top */
+    height: 100vh;
+    width: 100%;
+    padding-top: 10vh;
+}
+
+/* Logo image styling */
+.logo {
+    width: 150px; /* Adjust size */
+    margin-bottom: 20px; /* Space between image and login card */
+}
+
+/* Login container with responsive width */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Login card styling */
+.login-card h2 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.login-card p {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #777;
+}
+
+/* Input group styling */
+.input-group {
+    margin-bottom: 15px;
+    width: 100%;
+    text-align: left; /* Align content to the left */
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+    text-align: left; /* Ensures label is left-aligned */
+}
+
+.input-group input {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: left; /* Ensures text inside input is left-aligned */
+}
+
+/* Password input and toggle button */
+.password-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.password-wrapper input {
+    flex: 1;
+    margin-right: 5px;
+}
+
+.show-password {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Login button styling */
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #6c63ff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-button:hover {
+    background-color: #5548d9;
+}
+
+/* Footer section */
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.login-footer a {
+    color: #6c63ff;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+/* Background animation */
+@keyframes gradientBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
