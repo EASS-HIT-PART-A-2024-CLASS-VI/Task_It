@@ -23,6 +23,9 @@
 - **Deployment**: Docker and Docker Compose for containerization
 - **Authentication**: JWT-based token authentication
 
+<p align="center">
+  <img src="./my-new-app2/TaskItArcheitecture.png" width="400" alt="Task It Logo">
+</p>
 ---
 
 ## 📃 Table of Contents
