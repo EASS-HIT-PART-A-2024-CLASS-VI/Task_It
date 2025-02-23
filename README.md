@@ -21,7 +21,7 @@ Task It revolutionizes team collaboration with an intuitive task management plat
 
 ### 🎥 **Demo Video**
 
-[![Task It Preview](https://raw.githubusercontent.com/EASS-HIT-PART-A-2024-CLASS-VI/Task_It/main/Task_It_Preview.gif)](https://youtu.be/EfBlEMsbesQ)
+[![Task It Preview](https://raw.githubusercontent.com/EASS-HIT-PART-A-2024-CLASS-VI/Task_It/main/Task_It.gif)](https://youtu.be/EfBlEMsbesQ)
 
 🔹 *Click the preview to watch the full demo on YouTube!*
 
