@@ -19,8 +19,11 @@
 
 Task It revolutionizes team collaboration with an intuitive task management platform. Built with modern technologies, it offers real-time updates, interactive dashboards, and seamless team coordination capabilities.
 
-### 🎥 Demo Video
-[Watch our demo video here](#) to see Task It in action!
+### 🎥 **Demo Video**
+
+[![Task It Preview](https://raw.githubusercontent.com/EASS-HIT-PART-A-2024-CLASS-VI/Task_It/main/Task_It_Preview.gif)](https://youtu.be/EfBlEMsbesQ)
+
+🔹 *Click the preview to watch the full demo on YouTube!*
 
 ## 🎯 Key Features
 
