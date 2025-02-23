@@ -11,7 +11,7 @@
   [![Docker](https://img.shields.io/badge/Docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
   [![MongoDB](https://img.shields.io/badge/MongoDB-%2347A248.svg?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-  [📺 Watch Demo Video](#demo-video) | [🎯 Features](#-key-features) | [🏗️ Architecture](#architecture) | [🚀 Quick Start](#-quick-start)
+  [📺 Watch Demo Video](#demo-video) | [🎯 Features](#-key-features) | [🏗️ Architecture](#-architecture) | [🚀 Quick Start](#-quick-start)
   
 </div>
 
